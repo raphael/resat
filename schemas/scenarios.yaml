@@ -1,0 +1,144 @@
+# == Synopsis
+#   This file contains the Kwalify YAML schema for resat test scenarios.
+#   Scenarios consists of API requests and responses validation.
+#
+#   A scenario may include other scenarios in which case all the included
+#   scenarios steps will be executed first even if the included scenario
+#   is marked as 'ignore' (that way it becomes possible to define
+#   include-only scenarios).
+#
+#   Each step may define guards, that is conditions that must be validated
+#   before the flow can proceed. These conditions may apply to the response
+#   header or body and may define a pattern that a given field must validate
+#   for the guard to be enabled (and the flow to proceed). If no pattern is
+#   specified then all that is required is for the call to be successful. 
+#   During execution a guard will re-send the same request until the condition
+#   gets fulfilled or it timeouts.
+#   
+#   API responses bodies and headers can optionally be run through filters.
+#   Filters can provide additional validation and can also initialize variables
+#   from the response. These variables can the be used in headers and parameters
+#   to later API requests as well as patterns used for validation and extraction.
+#
+#   Variables are initialized via extractors defined in filters. Extractors
+#   may use a regular expression with a capturing group. The variable is 
+#   initialized with the first capturing group match. If no regular expression
+#   is specified then the whole field is stored in the given variable.
+#
+#   Fields in headers are identified by name while fields in response bodies 
+#   are identified by their XPath e.g.:
+#
+#   deployments/deployment/servers/server/state
+#
+#   Filters validation is done through regular expressions validators and/or
+#   checking whether a field is empty. All validators regular expressions must
+#   match for the validation to pass. The validation will be applied to all 
+#   elements matching the field XPath in the case of validators applied to a
+#   response body.
+#
+#   To use a variable simply prefix its name with the '$' character e.g.:
+#
+#   # Filter definition for extracting 'server_id' variable:
+#   target: header
+#   extractors:
+#   - field:    location
+#     pattern:  '.*\/servers\/(\d+)$'
+#     variable: server_id
+#   
+#   # API call definition using the 'server_id' variable:
+#   operation: show
+#   resource:  server
+#   id:        $server_id
+#
+
+# Schema for scenarios definitions
+type:  map
+class: Resat::Scenario
+mapping:
+  "name":   { type: str, required: yes }                                        # Scenario name
+  "ignore": { type: bool, default: no }                                         # Ignore scenario?
+  "includes":                                                                   # Included scenarios if any
+    type: seq
+    sequence:
+      - type: str
+  "steps":                                                                      # Scenario steps definition
+    type: seq
+    sequence:
+      - type: map
+        class: Resat::Step
+        mapping:
+          "request":                                                             # API Request definition
+            type:  map
+            class: Resat::ApiRequest
+            mapping:
+              "base_url":  { type: str }                                         # Request base URL (replaces config's)
+              "operation": { enum: [create, index, show, update, destroy] }      # Request operation
+              "custom":                                                          # Custom operation
+                type:  map
+                class: Resat::CustomOperation
+                mapping:
+                  "name":      { type: str, required: yes }                      # Custom operation name
+                  "type":      { enum: [get, post, put, delete], required: yes } # Custom operation request type
+                  "separator": { type: str, default: / }                         # Separator between base URI and operation name
+              "resource":  { type: str, required: yes }                          # Request resource
+              "id":        { type: str }                                         # Request resource id
+              "format":    { enum: [js, xml, html], default: xml }               # Request format (only applies to GET requests)
+              "params":                                                          # Request body parameters
+                &name_value_pairs
+                type: seq
+                sequence:
+                  - type: map
+                    mapping: 
+                      "name":  { type: str, required: yes, unique: yes }
+                      "value": { type: str, required: yes }
+              "headers": *name_value_pairs                                       # Request headers
+              "valid_codes":                                                     # List of valid response codes (all 2xx by default)
+                type: seq
+                sequence:
+                  - type: int
+          "guards":
+            type: seq
+            sequence:
+              - type:  map
+                class: Resat::Guard
+                mapping:
+                  "target":  { enum: [header, body], required: yes }             # Guard target (response header or body)
+                  "field":   { type: str, required: yes }                        # Field guard applies to
+                  "pattern": { type: str }                                       # Pattern field should match if any
+                  "period":  { type: int, default: 5 }                           # Period between API requests
+                  "timeout": { type: int, default: 120 }                         # Guard timeout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+          "filters":                                                             # Filters definition
+            type: seq
+            sequence:
+              - type:  map
+                class: Resat::Filter
+                mapping:
+                  "name":     { type: str, required: yes }                       # Filter name (used for logging)
+                  "target":   { enum: [header, body], required: yes }            # Filter target (response header or body)
+                  "is_empty": { type: bool, default: no }                        # Check target is (not) empty
+                  "required_fields":                                             # List of target's required fields
+                    type: seq
+                    sequence:
+                      - type: str
+                  "validators":                                                  # List of validators
+                    type: seq
+                    sequence:
+                      - type:  map
+                        class: Resat::Validator
+                        mapping:
+                          "field":    { type: str, required: yes }               # Field validator applies to
+                          "is_empty": { type: bool, default: no }                # Check field is (not) empty
+                          "pattern":  { type: str }                              # Regular expression field must match
+                  "extractors":                                                  # List of extractors
+                    type: seq
+                    sequence:
+                      - type:  map
+                        class: Resat::Extractor
+                        mapping:
+                          "field":    { type: str, required: yes }               # Field extractor applies to
+                          "pattern":  { type: str, pattern: /.*\(.*\).*/ }       # Pattern used to extract data (if any)
+                          "variable": { type: str, required: yes, unique: yes }  # Variable extracted data should be stored in
+
+# This last field is to circumvent a bug in the YAML parser that will cause
+# the parsing the loop forever if the last thing in the file is a comment
+  "notused": { type: str }

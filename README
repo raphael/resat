@@ -1,0 +1,94 @@
+== Where to get resat
+
+The source code is available via Git:
+
+  $ git clone git://github.com/raphael/resat.git
+
+== Dependencies
+
+  resat relies
+
+== Synopsis 
+  resat - Web scripting for the masses
+  
+  resat implements an engine that will run +scenarios+.
+  A scenario consists of HTTP requests optionally followed by guards and
+  filters.
+
+  Guards will keep re-sending the same request until certain conditions are
+  met (useful if a previous request causes state changes that are exposed via
+  a progress reporting REST resource).
+
+  Filters allow to validate the response and extract data from it for use in
+  following requests, guards and filters.
+
+  Scenarios are defined as YAML documents that must adhere to the Kwalify
+  schemas defined in schemas/scenarios.yaml. See the comments in this
+  file for additional information.
+
+  resat is configured through a YAML configuration file which defines
+  information that applies to all requests including the host name,
+  base url, whether to use SSL, common headers and body parameters and
+  optionally a username and password to be used with basic authentication.
+  This configuration file should be located in config/resat.yaml by default.
+
+== How to use
+
+  resat can be used as a ruby library or as an application. Using it as library
+  involves instantiating the engine and calling the 'run' method:
+
+    require 'resat'
+    
+    options = OpenStruct.new
+    options.verbose = false
+    options.quiet = false
+    options.norecursion = false
+    options.loglevel = "info"
+    options.logfile = "resat.log"
+    options.configfile = "config/resat.yaml"
+    options.schemasdir = 'schemas'
+
+    Resat::Log.init(options)
+    engine.run
+
+    if engine.succeeded?
+      puts engine.summary.dark_blue
+    else
+      puts engine.summary.dark_red
+    end
+    puts "#{engine.requests_count} request(s)."
+    puts "#{engine.ignored_count} scenario(s) ignored."
+    puts "#{engine.skipped_count} YAML file(s) skipped."
+
+  See the examples and usage sections below for using resat as an application.
+
+== Examples
+  Run the scenario defined in scenario.yaml:
+    resat scenario.yaml
+
+  Execute scenarios defined in the 'scenarios' directory and its
+  sub-directories:
+    resat scenarios
+
+  Only execute the scenarios defined in the current directory, do not execute
+  scenarios found in sub-directories:
+    resat -n .
+
+== Usage 
+  resat [options] target
+
+  For help use: resat -h
+
+== Options
+  -h, --help            Display help message
+  -v, --version         Display version, then exit
+  -q, --quiet           Output as little as possible, override verbose
+  -V, --verbose         Verbose output
+  -n, --norecursion     Don't run scenarios defined in sub-directories
+  -l, --loglevel        Log level: debug, info, warn, error (info by default)
+  -f, --logfile         Log file name (resat.log by default)
+  -c, --config          Config file name (config/resat.yaml by default)
+  -s, --schemasdir      Path to schemas directory (schemas/ by default)
+
+== Author
+   Raphael Simon
