@@ -1,14 +1,17 @@
 == Where to get resat
 
-The source code is available via Git:
+  The source code is available via Git:
 
-  $ git clone git://github.com/raphael/resat.git
+    $ git clone git://github.com/raphael/resat.git
 
 == Dependencies
 
-  resat relies
+  resat relies on Kwalify for validating YAML files:
+
+    $ sudo gem install kwalify 
 
 == Synopsis 
+
   resat - Web scripting for the masses
   
   resat implements an engine that will run +scenarios+.
@@ -63,6 +66,7 @@ The source code is available via Git:
   See the examples and usage sections below for using resat as an application.
 
 == Examples
+
   Run the scenario defined in scenario.yaml:
     resat scenario.yaml
 
@@ -75,11 +79,13 @@ The source code is available via Git:
     resat -n .
 
 == Usage 
+
   resat [options] target
 
   For help use: resat -h
 
 == Options
+
   -h, --help            Display help message
   -v, --version         Display version, then exit
   -q, --quiet           Output as little as possible, override verbose
