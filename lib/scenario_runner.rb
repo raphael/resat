@@ -263,8 +263,8 @@ module Resat
           add_failure("Response header #{'not ' unless @response.size == 0}empty.")
         end
       else
-        if !!filter.is_empty != (@response.body.size <= 1)
-          add_failure("Response body #{'not ' unless @response.body.size == 0}empty.")
+        if !!filter.is_empty != (@response.body.nil? || @response.body.size <= 1)
+          add_failure("Response body #{'not ' if filter.is_empty}empty.")
         end
       end
       
