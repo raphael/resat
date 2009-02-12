@@ -85,7 +85,9 @@ module Resat
         Log.info tms.format("\t\tUser\t\tSystem\t\tReal\nDuration:\t%u\t%y\t%r")
       else
         output_usage
+        @return_value = 1
       end
+      exit @return_value
     end
 
     protected
@@ -167,8 +169,10 @@ module Resat
       engine.run
       if engine.succeeded?
         puts engine.summary.dark_blue
+        @return_value = 0
       else
         puts engine.summary.dark_red
+        @return_value = 1
       end
       unless @options.quiet
         msg = ""

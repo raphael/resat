@@ -74,6 +74,9 @@ module Resat
             if step.filters
               @steps.concat(step.filters.map { |f| { :step => f, :origin => doc } })
             end
+            if step.guards
+              @steps.concat(step.guards.map { |g| { :step => g, :origin => doc } })
+            end
           end if scenario.steps
         end
       else
@@ -109,9 +112,12 @@ module Resat
           if step.filters
             @steps.concat(step.filters.map { |f| { :step => f, :origin => path } })
           end
+          if step.guards
+            @steps.concat(step.guards.map { |g| { :step => g, :origin => path } })
+          end
         end
       else
-        Log.error("Cannot include file '#{inc}': #{parser_error(parser.errors)}")
+        Log.error("Cannot include file '#{path}': #{parser_error(parser.errors)}")
       end
     end
     
@@ -171,7 +177,7 @@ module Resat
       path = "#{call.resource}/"
       path = "#{path}/#{call.id}" if call.id
       path = "#{path}/#{call.format}" if call.format && call.id
-      path = "#{path}#{custom.separator}#{custom.name}" if call.custom
+      path = "#{path}#{call.custom.separator}#{call.custom.name}" if call.custom
       @uri.merge!(path)
 
       # 3. Build request
@@ -232,7 +238,7 @@ module Resat
     # Wait for guard
     def wait_for_guard(guard)
       pattern = guard.pattern
-      resolve.vars!(pattern)
+      resolve_vars!(pattern)
       period = guard.period
       target = guard.target
       r = Regexp.new(pattern)
@@ -356,7 +362,7 @@ module Resat
   
   class Step
     include Kwalify::Util::HashLike
-    attr_accessor :request, :filters
+    attr_accessor :request, :filters, :guards
   end
   
   class ApiRequest
@@ -366,14 +372,14 @@ module Resat
   
   class CustomOperation
     include Kwalify::Util::HashLike
-    attr_accessor :name, :type
+    attr_accessor :name, :type, :separator
   end
 
   class Guard
     include Kwalify::Util::HashLike
-    attr_accessor :target, :field, :pattern, :period, :timeout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    attr_accessor :target, :field, :pattern, :period, :timeout
   end
-  
+
   class Filter
     include Kwalify::Util::HashLike
     attr_accessor :name, :target, :guards, :is_empty, :required_fields, :validators
