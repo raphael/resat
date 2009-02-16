@@ -12,13 +12,13 @@
 type:  map
 class: Resat::Config
 mapping:
-    "host":     { type: str, required: yes }
-    "port":     { type: int }
-    "base_url": { type: str, required: yes }
-    "use_ssl":  { type: bool, default: no }
-    "username": { type: str }
-    "password": { type: str }
-    "params":
+    "host":     { type: str, required: yes } # Default host
+    "port":     { type: int }                # Default port (optional)
+    "base_url": { type: str }                # Default base URL (optional)
+    "use_ssl":  { type: bool, default: no }  # http or https? (http by default)
+    "username": { type: str }                # Basic auth username (optional)
+    "password": { type: str }                # Basic auth password (optional)
+    "params":                                # Parameters used for all requests
         &name_value_pairs
         type: seq
         sequence:
@@ -26,5 +26,6 @@ mapping:
               mapping: 
                   "name":  { type: str, required: yes, unique: yes }
                   "value": { type: str, required: yes }
-    "headers":   *name_value_pairs
-    "variables": *name_value_pairs   
+    "headers":   *name_value_pairs           # Headers used for all requests
+    "variables": *name_value_pairs           # Global variables 
+

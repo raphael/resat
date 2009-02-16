@@ -6,7 +6,7 @@ module Resat
   class FileSet < Array
 
     # Folders that won't be scanned for files
-    IGNORED_FOLDERS = %w{. .. .svn}
+    IGNORED_FOLDERS = %w{ . .. .svn .git }
 
     # Initialize with all file names found in 'dir' and its sub-directories
     # with given file extensions

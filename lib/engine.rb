@@ -2,11 +2,12 @@
 # See resat.rb for usage information.
 #
 
-CWD = File.dirname(__FILE__)
-require File.join(CWD, 'log')
-require File.join(CWD, 'scenario_runner')
-require File.join(CWD, 'config')
-require File.join(CWD, 'file_set')
+ENG_DIR = File.dirname(__FILE__)
+require File.join(ENG_DIR, 'log')
+require File.join(ENG_DIR, 'scenario_runner')
+require File.join(ENG_DIR, 'config')
+require File.join(ENG_DIR, 'file_set')
+require File.join(ENG_DIR, 'variables')
 
 module Resat
 
@@ -43,6 +44,7 @@ module Resat
     # Run all scenarios and set attributes accordingly
     def run
       if @valid
+        Config.variables.each { |v| Variables[v['name']] = v['value'] }
         begin
           if File.directory?(@options.target)
             files = FileSet.new(@options.target, %w{.yml .yaml})
@@ -50,7 +52,7 @@ module Resat
             files = [@options.target]
           end
           files.each do |file|
-            runner = ScenarioRunner.new(file, @options.schemasdir, @options.variables)
+            runner = ScenarioRunner.new(file, @options.schemasdir)
             @ignored_count += 1 if runner.ignored?
             @skipped_count += 1 unless runner.valid?
             if runner.valid? && !runner.ignored?

@@ -14,26 +14,40 @@
 
   resat - Web scripting for the masses
   
-  resat implements an engine that will run +scenarios+.
+  resat allows running predefined +scenarios+.
   A scenario consists of HTTP requests optionally followed by guards and
   filters.
 
-  Guards will keep re-sending the same request until certain conditions are
-  met (useful if a previous request causes state changes that are exposed via
-  a progress reporting REST resource).
+  Guards will keep re-sending the same request until the response header and/or
+  body satisfy(ies) certain conditions.
 
-  Filters allow to validate the response and extract data from it for use in
-  following requests, guards and filters.
+  Filters will validate the response and/or save some of its elements in
+  variables. Variables can be used to define requests, guards and filters.
 
   Scenarios are defined as YAML documents that must adhere to the Kwalify
   schemas defined in schemas/scenarios.yaml. See the comments in this
   file for additional information.
 
   resat is configured through a YAML configuration file which defines
-  information that applies to all requests including the host name,
+  default values that applies to all requests including the host name,
   base url, whether to use SSL, common headers and body parameters and
   optionally a username and password to be used with basic authentication.
-  This configuration file should be located in config/resat.yaml by default.
+  This configuration file is located in config/resat.yaml by default.
+
+== Installation
+  
+  Run the following from this folder to be able to run resat from anywhere:
+  sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+
+== Why resat?
+  
+  There are two main use cases for resat:
+    1. Scripting a serie of REST API calls that can be used to perform common
+       tasks. For example creating a preset deployment or running a set of
+       operational scripts on instances in RightScale.
+    2. API testing: For REST API implementors, resat is the ideal automated
+       regression tool. This is the tool we use at RightScale to test our
+       APIs.
 
 == How to use
 
@@ -52,6 +66,7 @@
     options.schemasdir = 'schemas'
 
     Resat::Log.init(options)
+    engine = Resat::Engine.new(options)
     engine.run
 
     if engine.succeeded?
@@ -91,10 +106,11 @@
   -q, --quiet           Output as little as possible, override verbose
   -V, --verbose         Verbose output
   -n, --norecursion     Don't run scenarios defined in sub-directories
-  -l, --loglevel        Log level: debug, info, warn, error (info by default)
-  -f, --logfile         Log file name (resat.log by default)
-  -c, --config          Config file name (config/resat.yaml by default)
-  -s, --schemasdir      Path to schemas directory (schemas/ by default)
+  -d, --define VAR:VAL  Define variable (may appear multiple times)
+  -c, --config PATH     Config file name (config/resat.yaml by default)
+  -s, --schemasdir DIR  Path to schemas directory (schemas/ by default)
+  -l, --loglevel LVL    Log level: debug, info, warn, error (info by default)
+  -f, --logfile PATH    Log file name (resat.log by default)
 
 == Author
    Raphael Simon

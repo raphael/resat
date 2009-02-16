@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 # === Synopsis 
 #   resat - RightScale API Tester
 #   
@@ -51,19 +53,21 @@
 #
 
 require 'rubygems'
-require 'lib/rdoc_patch'
-require 'lib/engine'
-require 'lib/log'
-require 'lib/config'
 require 'optparse' 
 require 'rdoc/usage'
 require 'ostruct'
 require 'date'
 require 'benchmark'
+THIS_FILE = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
+RESAT_DIR = File.dirname(THIS_FILE)
+require File.join(RESAT_DIR, 'lib/rdoc_patch')
+require File.join(RESAT_DIR, 'lib/engine')
+require File.join(RESAT_DIR, 'lib/log')
+require File.join(RESAT_DIR, 'lib/config')
 
 module Resat
   class App
-    VERSION = '0.0.1'
+    VERSION = '0.1.0'
 
     def initialize(arguments)
       @arguments = arguments

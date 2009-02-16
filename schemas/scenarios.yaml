@@ -71,7 +71,12 @@ mapping:
             type:  map
             class: Resat::ApiRequest
             mapping:
-              "base_url":  { type: str }                                         # Request base URL (replaces config's)
+              "host":      { type: str }                                         # Request host (config override)
+              "port":      { type: str }                                         # Request port (config override)
+              "base_url":  { type: str }                                         # Request base URL (config override)
+              "use_ssl":   { type: bool }                                        # http or https (config override)
+              "username":  { type: str }                                         # Basic auth username (config override)
+              "password":  { type: str }                                         # Basic auth password (config override)
               "operation": { enum: [create, index, show, update, destroy] }      # Request operation
               "custom":                                                          # Custom operation
                 type:  map
@@ -102,11 +107,12 @@ mapping:
               - type:  map
                 class: Resat::Guard
                 mapping:
+                  "name":    { type: str, required: yes }
                   "target":  { enum: [header, body], required: yes }             # Guard target (response header or body)
                   "field":   { type: str, required: yes }                        # Field guard applies to
                   "pattern": { type: str }                                       # Pattern field should match if any
                   "period":  { type: int, default: 5 }                           # Period between API requests
-                  "timeout": { type: int, default: 120 }                         # Guard timeout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+                  "timeout": { type: int, default: 120 }                         # Guard timeout 
           "filters":                                                             # Filters definition
             type: seq
             sequence:

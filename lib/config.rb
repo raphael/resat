@@ -36,6 +36,11 @@ module Resat
 
   class Config
    
+    DEFAULTS = {
+      'base_url' => '',
+      'use_ssl' => false,
+    }
+
     def Config.init(filename, schemasdir = 'schemas')
       schemafile = File.join(schemasdir, 'config.yaml')
       unless File.exists?(schemafile)
@@ -59,7 +64,7 @@ module Resat
           @config.each_key do |meth|
             (class << self; self; end).class_eval do
               define_method meth do |*args|
-                @config[meth]
+                @config[meth] || DEFAULTS[meth]
               end
             end
           end
