@@ -39,10 +39,12 @@
 #   -q, --quiet           Output as little as possible, override verbose
 #   -V, --verbose         Verbose output
 #   -n, --norecursion     Don't run scenarios defined in sub-directories
-#   -l, --loglevel        Log level: debug, info, warn, error (info by default)
-#   -f, --logfile         Log file name (resat.log by default)
-#   -c, --config          Config file name (config/resat.yaml by default)
-#   -s, --schemasdir      Path to schemas directory (schemas/ by default)
+#   -d, --define NAME:VAL Define global variable (can appear multiple times,
+#                         escape ':' with '::')
+#   -c, --config PATH     Config file path (config/resat.yaml by default)
+#   -s, --schemasdir DIR  Path to schemas directory (schemas/ by default)
+#   -l, --loglevel LVL    Log level: debug, info, warn, error (info by default)
+#   -f, --logfile PATH    Log file path (resat.log by default)
 #
 # === Author
 #   Raphael Simon
@@ -71,10 +73,11 @@ module Resat
       @options.verbose = false
       @options.quiet = false
       @options.norecursion = false
-      @options.loglevel = "info"
-      @options.logfile = "resat.log"
+      @options.variables = {}
       @options.configfile = "config/resat.yaml"
       @options.schemasdir = 'schemas'
+      @options.loglevel = "info"
+      @options.logfile = "resat.log"
     end
 
     # Parse options, check arguments, then run tests
@@ -99,15 +102,39 @@ module Resat
       opts.on('-q', '--quiet')          { @options.quiet = true }
       opts.on('-V', '--verbose')        { @options.verbose = true }
       opts.on('-n', '--norecursion')    { @options.norecursion = true }
-      opts.on('-l', '--loglevel LEVEL') { |level| @options.loglevel = level }
-      opts.on('-f', '--logfile LOG')    { |log| @options.logfile = log }
+      opts.on('-d', '--define VAR:VAL') { |v| @options.variables.merge!(var_hash(v)) }
       opts.on('-c', '--configfile CFG') { |cfg| @options.configfile = cfg }
       opts.on('-s', '--schemasdir DIR') { |dir| @options.schemasdir = dir }
+      opts.on('-l', '--loglevel LEVEL') { |level| @options.loglevel = level }
+      opts.on('-f', '--logfile LOG')    { |log| @options.logfile = log }
 
       opts.parse!(@arguments) rescue return false
 
       process_options
       true
+    end
+
+    # Build variable hash from command line option
+    def var_hash(var)
+      parts = var.split('::')
+      key = value = ''
+      key_built = false
+      parts.each_index do |idx|
+        part = parts[idx]
+        if key_built
+          value = value + ':' + (part || '')
+        else
+          if part.include?(':')
+            subparts = part.split(':')
+            part = subparts[0]
+            value = subparts[1] || ''
+            key_built = true
+          end
+          key = key + ':' if idx > 0
+          key = key + (part || '')
+        end
+      end
+      { key => value }
     end
 
     # Post-parse processing of options

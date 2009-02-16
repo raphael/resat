@@ -2,10 +2,11 @@
 # See resat.rb for usage information.
 #
 
-require File.join(File.dirname(__FILE__), 'log')
-require File.join(File.dirname(__FILE__), 'scenario_runner')
-require File.join(File.dirname(__FILE__), 'config')
-require File.join(File.dirname(__FILE__), 'file_set')
+CWD = File.dirname(__FILE__)
+require File.join(CWD, 'log')
+require File.join(CWD, 'scenario_runner')
+require File.join(CWD, 'config')
+require File.join(CWD, 'file_set')
 
 module Resat
 
@@ -49,7 +50,7 @@ module Resat
             files = [@options.target]
           end
           files.each do |file|
-            runner = ScenarioRunner.new(file, @options.schemasdir)
+            runner = ScenarioRunner.new(file, @options.schemasdir, @options.variables)
             @ignored_count += 1 if runner.ignored?
             @skipped_count += 1 unless runner.valid?
             if runner.valid? && !runner.ignored?
