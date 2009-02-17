@@ -1,12 +1,26 @@
 # == Synopsis
+#
 #   This file contains the Kwalify YAML schema for the resat config file
 #
 #   The resat config file is used to specify the API URI components as
 #   well as any required auxiliary information (such as username/password)
 #
-#   The params and headers collections define request parameters and headers
-#   that will be sent with every API calls.
+#   The 'params' and 'headers' collections define request parameters and 
+#   headers that will be sent with every API calls by default.
+# 
+#   The 'variables' collection define global variables and their values.
+#   The 'output' field defines the path to the file where extracted
+#   variables should be saved if the corresponding 'save' field in the 
+#   scenario is true.
+#   The 'input' field defines the path to the file where variables are
+#   defined that should be loaded prior to executing any scenario.
+#   Both the output and input file use YAML to serialize variables so that
+#   a file produced as an output of resat can be later used as input.
 #
+# == Note
+#
+#  All the URI components defined in the Config file may be overridden by
+#  each request in the scenario.
 
 # Schema for resat configuration
 type:  map
@@ -27,5 +41,7 @@ mapping:
                   "name":  { type: str, required: yes, unique: yes }
                   "value": { type: str, required: yes }
     "headers":   *name_value_pairs           # Headers used for all requests
-    "variables": *name_value_pairs           # Global variables 
+    "variables": *name_value_pairs           # Global variables
+    "output":   { type: str }                # Path to variables save file
+    "input":    { type: str }                # Path to variables load file
 

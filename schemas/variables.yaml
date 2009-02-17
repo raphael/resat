@@ -1,0 +1,18 @@
+# == Synopsis
+#
+#   This file contains the Kwalify YAML schema for files containing serialized
+#   variables.
+#
+#   resat scenarios may define filters with extractors that can save the
+#   extracted value to an output file specified in the config file.
+#
+#   variables are serialized into a name value pairs YAML sequence.
+#
+
+# Schema for serialized variables
+type:  seq
+sequence:
+  - type: map
+    mapping: 
+        "name":  { type: str, required: yes, unique: yes }
+        "value": { type: str, required: yes }

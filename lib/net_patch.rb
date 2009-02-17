@@ -3,6 +3,9 @@
 # See resat.rb for usage information.
 #
 
+require 'net/http'
+require 'net/https'
+
 module Net
   class HTTP
     def warn(*obj)

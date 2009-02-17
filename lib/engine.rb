@@ -3,11 +3,9 @@
 #
 
 ENG_DIR = File.dirname(__FILE__)
+require File.join(ENG_DIR, 'file_set')
 require File.join(ENG_DIR, 'log')
 require File.join(ENG_DIR, 'scenario_runner')
-require File.join(ENG_DIR, 'config')
-require File.join(ENG_DIR, 'file_set')
-require File.join(ENG_DIR, 'variables')
 
 module Resat
 
@@ -21,19 +19,12 @@ module Resat
                                   # indexed by scenario filename
 
     def initialize(options)
-      @options = options
-      Config.init(options.configfile, options.schemasdir)
-      @valid = Config.valid?
-      @run_count = 0
-      @failures = Hash.new
-      @ignored_count = 0
+      @options        = options
+      @failures       = Hash.new
+      @run_count      = 0
+      @ignored_count  = 0
       @requests_count = 0
-      @skipped_count = 0
-    end
-
-    # Is configuration valid?
-    def valid?
-      @valid
+      @skipped_count  = 0
     end
     
     # Was test run successful?
@@ -43,35 +34,32 @@ module Resat
 
     # Run all scenarios and set attributes accordingly
     def run
-      if @valid
-        Config.variables.each { |v| Variables[v['name']] = v['value'] }
-        begin
-          if File.directory?(@options.target)
-            files = FileSet.new(@options.target, %w{.yml .yaml})
-          else
-            files = [@options.target]
-          end
-          files.each do |file|
-            runner = ScenarioRunner.new(file, @options.schemasdir)
-            @ignored_count += 1 if runner.ignored?
-            @skipped_count += 1 unless runner.valid?
-            if runner.valid? && !runner.ignored?
-              runner.run
-              @run_count += 1
-              @requests_count += runner.requests_count
-              @failures[file] = runner.failures unless runner.failures.empty?
-            else
-              unless runner.valid?
-                Log.info "Skipping '#{file}' (#{runner.parser_errors})"
-              end
-              Log.info "Ignoring '#{file}'" if runner.ignored?
-            end
-          end 
-        rescue Exception => e
-          Log.error("Something really bad happened#{': ' unless e.message.empty?}#{e.message}")
-          backtrace = e.backtrace.inject("") { |msg, s| msg << "#{s}\n" }
-          Log.fatal("#{e.message}#{': ' unless e.message.empty?}#{backtrace}")
+      begin
+        if File.directory?(@options.target)
+          files = FileSet.new(@options.target, %w{.yml .yaml})
+        else
+          files = [@options.target]
         end
+         files.each do |file|
+          runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, @options.variables)
+          @ignored_count += 1 if runner.ignored?
+          @skipped_count += 1 unless runner.valid?
+          if runner.valid? && !runner.ignored?
+            runner.run
+            @run_count += 1
+            @requests_count += runner.requests_count
+            @failures[file] = runner.failures unless runner.failures.empty?
+          else
+            unless runner.valid?
+              Log.info "Skipping '#{file}' (#{runner.parser_errors})"
+            end
+            Log.info "Ignoring '#{file}'" if runner.ignored?
+          end
+        end 
+      rescue Exception => e
+        Log.error("Something really bad happened#{': ' unless e.message.empty?}#{e.message}")
+        backtrace = e.backtrace.inject("") { |msg, s| msg << "#{s}\n" }
+        Log.fatal("#{e.message}#{': ' unless e.message.empty?}#{backtrace}")
       end
     end
 

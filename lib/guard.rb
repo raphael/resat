@@ -5,8 +5,6 @@
 # See resat.rb for usage information.
 #
 
-require 'kwalify/util/hashlike'
-
 module Resat
   
   class Guard

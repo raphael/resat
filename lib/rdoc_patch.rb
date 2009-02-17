@@ -3,6 +3,8 @@
 # See resat.rb for usage information.
 #
 
+require 'rdoc/usage'
+
 module RDoc
   # Force the use of comments in this file so RDoc::usage works even when
   # invoked from a proxy (e.g. 'resat' bash script)

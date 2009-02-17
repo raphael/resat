@@ -56,6 +56,7 @@ type:  map
 class: Resat::Scenario
 mapping:
   "name":   { type: str, required: yes }                                        # Scenario name
+  "config": { type: str }                                                       # Path to config file
   "ignore": { type: bool, default: no }                                         # Ignore scenario?
   "includes":                                                                   # Included scenarios if any
     type: seq
@@ -144,6 +145,7 @@ mapping:
                           "field":    { type: str, required: yes }               # Field extractor applies to
                           "pattern":  { type: str, pattern: /.*\(.*\).*/ }       # Pattern used to extract data (if any)
                           "variable": { type: str, required: yes, unique: yes }  # Variable extracted data should be stored in
+                          "save":     { type: bool, default: no }                # Whether variable should be saved in output file
 
 # This last field is to circumvent a bug in the YAML parser that will cause
 # the parsing the loop forever if the last thing in the file is a comment

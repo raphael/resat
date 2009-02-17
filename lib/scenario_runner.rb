@@ -2,15 +2,14 @@
 # See resat.rb for usage information.
 #
 
-require 'kwalify'
 require 'kwalify/util/hashlike'
+require File.join(File.dirname(__FILE__), 'kwalify_helper')
+require File.join(File.dirname(__FILE__), 'config')
+require File.join(File.dirname(__FILE__), 'variables')
 require File.join(File.dirname(__FILE__), 'api_request')
 require File.join(File.dirname(__FILE__), 'guard')
 require File.join(File.dirname(__FILE__), 'filter')
-require File.join(File.dirname(__FILE__), 'file_set')
-require File.join(File.dirname(__FILE__), 'net_patch')
 
-require 'ruby-debug'
 module Resat
 
   class ScenarioRunner
@@ -20,14 +19,24 @@ module Resat
     # schemas directory.
     # If parsing the scenario YAML definition fails then 'valid?' returns false
     # and 'parser_errors' contains the error messages.
-    def initialize(doc, schemasdir)
-      @schemasdir = schemasdir
-      @valid = true
-      @ignored = false
-      @name = ''
-      @failures = Array.new
+    def initialize(doc, schemasdir, config, variables)
+      @schemasdir     = schemasdir
+      @valid          = true
+      @ignored        = false
+      @name           = ''
+      @failures       = Array.new
       @requests_count = 0
       parse(doc)
+      if @valid
+        Config.init(config || @cfg_file, schemasdir)
+        @valid = Config.valid?
+        if @valid
+          Variables.reset
+          Variables.load(Config.input, schemasdir) if Config.input
+          Config.variables.each { |v| Variables[v['name']] = v['value'] }
+          variables.each { |k, v| Variables[k] = v } if variables
+        end
+      end
     end
     
     def ignored?;   @ignored;         end
@@ -40,6 +49,12 @@ module Resat
     def run
       return if @ignored || !@valid
       Log.info("-" * 80 + "\nRunning scenario #{@name}")
+      unless Variables.empty?
+        info_msg = Variables.all.inject("Using variables:") do |msg, (k, v)|
+          msg << "\n   - #{k}: #{v}"
+        end
+        Log.info(info_msg)
+      end
       @steps.each_index do |index|
         @current_step = index
         @current_file = @steps[index][:origin]
@@ -58,6 +73,7 @@ module Resat
         return unless succeeded? # Abort on failure
       end
       @requests_count += @request.send_count
+      Variables.save(Config.output) if Config.output
     end
 
     protected
@@ -65,10 +81,11 @@ module Resat
     # Parse YAML definition file and set 'valid?' and 'parser_errors' 
     # accordingly
     def parse(doc)
-      parser = new_parser
+      parser = KwalifyHelper.new_parser(File.join(@schemasdir, 'scenarios.yaml'))
       scenario = parser.parse_file(doc)
       if parser.errors.empty?
         @ignored = !scenario || scenario.ignore
+        @cfg_file = scenario.config
         unless @ignored
           @name = scenario.name
           @steps = Array.new
@@ -87,7 +104,7 @@ module Resat
         end
       else
         @valid = false
-        @parser_errors = parser_error(parser.errors)
+        @parser_errors = KwalifyHelper.parser_error(parser)
       end
     end
     
@@ -107,7 +124,7 @@ module Resat
     end
 
     def include_steps(path)
-      parser = new_parser
+      parser = KwalifyHelper.new_parser(File.join(@schemasdir, 'scenarios.yaml'))
       scenario = parser.parse_file(path)
       if parser.errors.empty?
         scenario.includes.each do |inc|
@@ -140,24 +157,7 @@ module Resat
       subs = subs - FileSet::IGNORED_FOLDERS
       subs.detect { |sub| find_include(inc, File.join(dir, sub)) }
     end
-    
-    def parser_error(errors)
-      first = true
-      errors.inject("") do |msg, e|
-        msg << "\n" unless first
-        first = false if first
-        msg << "#{e.linenum}:#{e.column} [#{e.path}] #{e.message}"
-      end
-    end
-    
-    def new_parser
-      schemafile = File.join(@schemasdir, 'scenarios.yaml')
-      schema = Kwalify::Yaml.load_file(schemafile)
-      validator = Kwalify::Validator.new(schema)
-      res = Kwalify::Yaml::Parser.new(validator)
-      res.data_binding = true
-      res
-    end
+
 
     # Append error message to list of failures
     def add_failure(failure)
@@ -170,7 +170,7 @@ module Resat
  
   class Scenario
     include Kwalify::Util::HashLike # defines [], []= and keys?
-    attr_accessor :name, :ignore, :includes, :steps
+    attr_accessor :name, :config, :includes, :steps
     def ignore; @ignore || false; end
   end
   
@@ -181,7 +181,7 @@ module Resat
   
   class CustomOperation
     include Kwalify::Util::HashLike
-    attr_accessor :name, :type, :separator
+    attr_accessor :name, :type
     def separator; @separator || "/"; end
   end
 

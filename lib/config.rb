@@ -29,20 +29,22 @@
 # See resat.rb for usage information.
 #
 
-require 'kwalify'
-require File.join(File.dirname(__FILE__), 'log')
-
 module Resat
 
   class Config
    
+    DEFAULT_FILE = 'config/resat.yaml'
+    
+    DEFAULT_SCHEMA_DIR = 'schemas'
+
     DEFAULTS = {
       'base_url' => '',
       'use_ssl' => false,
+      'variables' => {}
     }
 
-    def Config.init(filename, schemasdir = 'schemas')
-      schemafile = File.join(schemasdir, 'config.yaml')
+    def Config.init(filename, schemasdir)
+      schemafile = File.join(schemasdir || DEFAULT_SCHEMA_DIR, 'config.yaml')
       unless File.exists?(schemafile)
         Log.error("Missing configuration file schema '#{schemafile}'")
         @valid = false
@@ -53,10 +55,11 @@ module Resat
       parser    = Kwalify::Yaml::Parser.new(validator)
       @valid    = true
       @config   = { 'use_ssl' => false, 'username' => nil, 'password' => nil, 'port' => nil }
-      config = parser.parse_file(filename)
+      cfg_file  = filename || DEFAULT_FILE
+      config    = parser.parse_file(cfg_file)
       if parser.errors.empty?
         if config.nil?
-          Log.error("Configuration file '#{filename}' is empty.")
+          Log.error("Configuration file '#{cfg_file}' is empty.")
           @valid = false
         else
           @config.merge!(config)
@@ -73,13 +76,17 @@ module Resat
         errors = parser.errors.inject("") do |msg, e|
           msg << "#{e.linenum}:#{e.column} [#{e.path}] #{e.message}\n\n"
         end
-        Log.error("Configuration file '#{filename}' is invalid:\n#{errors}")
+        Log.error("Configuration file '#{cfg_file}' is invalid:\n#{errors}")
         @valid = false
       end
     end
 
     def Config.valid?
       @valid
+    end
+    
+    def self.method_missing(*args)
+      nil
     end
 
   end

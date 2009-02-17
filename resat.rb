@@ -54,16 +54,12 @@
 
 require 'rubygems'
 require 'optparse' 
-require 'rdoc/usage'
 require 'ostruct'
 require 'date'
 require 'benchmark'
 THIS_FILE = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
-RESAT_DIR = File.dirname(THIS_FILE)
-require File.join(RESAT_DIR, 'lib/rdoc_patch')
-require File.join(RESAT_DIR, 'lib/engine')
-require File.join(RESAT_DIR, 'lib/log')
-require File.join(RESAT_DIR, 'lib/config')
+require File.join(File.dirname(THIS_FILE), 'lib/rdoc_patch')
+require File.join(File.dirname(THIS_FILE), 'lib/engine')
 
 module Resat
   class App
@@ -78,7 +74,7 @@ module Resat
       @options.quiet = false
       @options.norecursion = false
       @options.variables = {}
-      @options.configfile = "config/resat.yaml"
+      @options.config = nil
       @options.schemasdir = 'schemas'
       @options.loglevel = "info"
       @options.logfile = "resat.log"
@@ -107,7 +103,7 @@ module Resat
       opts.on('-V', '--verbose')        { @options.verbose = true }
       opts.on('-n', '--norecursion')    { @options.norecursion = true }
       opts.on('-d', '--define VAR:VAL') { |v| @options.variables.merge!(var_hash(v)) }
-      opts.on('-c', '--configfile CFG') { |cfg| @options.configfile = cfg }
+      opts.on('-c', '--config PATH')    { |cfg| @options.config = cfg }
       opts.on('-s', '--schemasdir DIR') { |dir| @options.schemasdir = dir }
       opts.on('-l', '--loglevel LEVEL') { |level| @options.loglevel = level }
       opts.on('-f', '--logfile LOG')    { |log| @options.logfile = log }
@@ -161,10 +157,6 @@ module Resat
       if valid
         unless %w{ debug info warn error }.include? @options.loglevel
           Log.error "Invalid log level '#{@options.loglevel}'"
-          valid = false
-        end
-        unless File.file?(@options.configfile)
-          Log.error "Non-existent config file '#{@options.configfile}'"
           valid = false
         end
         unless File.directory?(@options.schemasdir)

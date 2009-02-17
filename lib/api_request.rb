@@ -2,11 +2,9 @@
 # See resat.rb for usage information.
 #
 
-require 'kwalify/util/hashlike'
 require 'uri'
-require 'net/http'
-require 'net/https'
 require 'rexml/document'
+require File.join(File.dirname(__FILE__), 'net_patch')
 
 module Resat
   

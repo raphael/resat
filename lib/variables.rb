@@ -7,26 +7,12 @@ module Resat
 
   class Variables
     include Singleton
-    attr_reader :vars
+    attr_reader :vars, :marked_for_save
 
     # Replace occurrences of environment variables in +raw+ with their value
     def Variables.substitute!(raw)
       instance().substitute!(raw)
     end
-
-    def Variables.[](key)
-      instance().vars[key]
-    end
-
-    def Variables.[]=(key, value)
-      instance().vars[key] = value
-    end
-
-    def Variables.include?(key)
-      instance().vars.include?(key)
-    end
-
-    # Replace occurrences of environment variables with their value
     def substitute!(raw)
       if raw.kind_of?(String)
         scans = Array.new
@@ -42,11 +28,73 @@ module Resat
         raw.each { |k, v| substitute!(v) }
       end
     end
+    
+    def Variables.[](key)
+      instance().vars[key]
+    end
+
+    def Variables.[]=(key, value)
+      instance().vars[key] = value
+    end
+
+    def Variables.include?(key)
+      instance().vars.include?(key)
+    end
+    
+    def Variables.empty?
+      instance().vars.empty?
+    end
+    
+    def Variables.all
+      instance().vars
+    end
+
+    def Variables.load(file, schemasdir)
+      schemafile = File.join(schemasdir, 'variables.yaml')
+      schema = Kwalify::Yaml.load_file(schemafile)
+      validator = Kwalify::Validator.new(schema)
+      parser = Kwalify::Yaml::Parser.new(validator)
+      serialized_vars = parser.parse_file(file)
+      if parser.errors.empty?
+        vars = instance().vars
+        serialized_vars.each { |v| vars[v['name']] = v['value'] }
+      else
+        Log.warning("Error loading variables from '#{file}': #{KwalifyHelper.parser_error(parser)}")
+      end
+    end
+    
+    def Variables.save(file)
+      serialized_vars = []
+      i = instance()
+      i.vars.each do |k, v|
+        if i.marked_for_save.include?(k)
+          serialized_vars << { 'name' => k, 'value' => v }
+        end
+      end
+      File.open(file, 'w') do |out|
+        YAML.dump(serialized_vars, out)
+      end
+    end
+    
+    def Variables.mark_for_save(key)
+      instance().mark_for_save(key)
+    end
+    def mark_for_save(key)
+      @marked_for_save << key
+    end      
+    
+    def Variables.reset
+      instance().reset
+    end
+    def reset
+      @vars = Hash.new
+      @marked_for_save = Array.new
+    end
 
     protected
 
     def initialize
-      @vars = Hash.new
+      reset
       super
     end
 
