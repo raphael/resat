@@ -43,6 +43,7 @@
 #   -n, --norecursion     Don't run scenarios defined in sub-directories
 #   -d, --define NAME:VAL Define global variable (can appear multiple times,
 #                         escape ':' with '::')
+#   -e, --stoponerror     Stop resat from contiuing to run if an error occurs
 #   -c, --config PATH     Config file path (config/resat.yaml by default)
 #   -s, --schemasdir DIR  Path to schemas directory (schemas/ by default)
 #   -l, --loglevel LVL    Log level: debug, info, warn, error (info by default)
