@@ -19,14 +19,14 @@ module Resat
     # schemas directory.
     # If parsing the scenario YAML definition fails then 'valid?' returns false
     # and 'parser_errors' contains the error messages.
-    def initialize(doc, schemasdir, config, variables, stoponerror)
+    def initialize(doc, schemasdir, config, variables, failonerror)
       @schemasdir     = schemasdir
       @valid          = true
       @ignored        = false
       @name           = ''
       @failures       = Array.new
       @requests_count = 0
-      @stoponerror = stoponerror
+      @failonerror = failonerror
       parse(doc)
       if @valid
         Config.init(config || @cfg_file, schemasdir)
@@ -71,7 +71,7 @@ module Resat
           step.run(@request) 
         end
         step.failures.each { |f| add_failure(f) }
-         if @stoponerror
+         if @failonerror
           return unless succeeded? # Abort on failure
         end
       end

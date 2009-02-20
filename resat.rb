@@ -43,11 +43,11 @@
 #   -n, --norecursion     Don't run scenarios defined in sub-directories
 #   -d, --define NAME:VAL Define global variable (can appear multiple times,
 #                         escape ':' with '::')
-#   -e, --stoponerror     Stop resat from contiuing to run if an error occurs
+#   -f, --failonerror     Stop resat from continuing to run if an error occurs
 #   -c, --config PATH     Config file path (config/resat.yaml by default)
 #   -s, --schemasdir DIR  Path to schemas directory (schemas/ by default)
 #   -l, --loglevel LVL    Log level: debug, info, warn, error (info by default)
-#   -f, --logfile PATH    Log file path (resat.log by default)
+#   -F, --logfile PATH    Log file path (resat.log by default)
 #
 # === Author
 #   Raphael Simon
@@ -74,7 +74,7 @@ module Resat
       @options.verbose = false
       @options.quiet = false
       @options.norecursion = false
-      @options.stoponerror = false
+      @options.failonerror = false
       @options.variables = {}
       @options.config = nil
       @options.schemasdir = 'schemas'
@@ -104,12 +104,12 @@ module Resat
       opts.on('-q', '--quiet')          { @options.quiet = true }
       opts.on('-V', '--verbose')        { @options.verbose = true }
       opts.on('-n', '--norecursion')    { @options.norecursion = true }
-      opts.on('-e', '--stoponerror')    { @options.stoponerror = true }
+      opts.on('-f', '--failonerror')    { @options.failonerror = true }
       opts.on('-d', '--define VAR:VAL') { |v| @options.variables.merge!(var_hash(v)) }
       opts.on('-c', '--config PATH')    { |cfg| @options.config = cfg }
       opts.on('-s', '--schemasdir DIR') { |dir| @options.schemasdir = dir }
       opts.on('-l', '--loglevel LEVEL') { |level| @options.loglevel = level }
-      opts.on('-f', '--logfile LOG')    { |log| @options.logfile = log }
+      opts.on('-F', '--logfile LOG')    { |log| @options.logfile = log }
 
       opts.parse!(@arguments) rescue return false
 
