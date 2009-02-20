@@ -73,6 +73,7 @@ module Resat
       @options.verbose = false
       @options.quiet = false
       @options.norecursion = false
+      @options.stoponerror = false
       @options.variables = {}
       @options.config = nil
       @options.schemasdir = 'schemas'
@@ -102,6 +103,7 @@ module Resat
       opts.on('-q', '--quiet')          { @options.quiet = true }
       opts.on('-V', '--verbose')        { @options.verbose = true }
       opts.on('-n', '--norecursion')    { @options.norecursion = true }
+      opts.on('-e', '--stoponerror')    { @options.stoponerror = true }
       opts.on('-d', '--define VAR:VAL') { |v| @options.variables.merge!(var_hash(v)) }
       opts.on('-c', '--config PATH')    { |cfg| @options.config = cfg }
       opts.on('-s', '--schemasdir DIR') { |dir| @options.schemasdir = dir }

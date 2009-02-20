@@ -41,7 +41,7 @@ module Resat
           files = [@options.target]
         end
          files.each do |file|
-          runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, @options.variables)
+          runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, @options.variables, @options.stoponerror)
           @ignored_count += 1 if runner.ignored?
           @skipped_count += 1 unless runner.valid?
           if runner.valid? && !runner.ignored?
