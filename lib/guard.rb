@@ -21,7 +21,7 @@ module Resat
       r = Regexp.new(@pattern)
       r.match(request.get_response_field(@field, @target))
       expiration = DateTime.now + @timeout
-      while !Regexp.last_match && DateTime.now < expiration && succeeded?
+      while !Regexp.last_match && DateTime.now < expiration && request.succeeded?
         sleep period
         request.send
         r.match(request.get_response_field(@field, @target))
