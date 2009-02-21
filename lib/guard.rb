@@ -22,7 +22,7 @@ module Resat
       r.match(request.get_response_field(@field, @target))
       expiration = DateTime.now + @timeout
       while !Regexp.last_match && DateTime.now < expiration && request.failures.empty?
-        sleep period
+        sleep @period
         request.send
         r.match(request.get_response_field(@field, @target))
       end
