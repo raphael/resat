@@ -40,7 +40,7 @@ module Resat
                              :path => @base_url || Config.base_url )
       path = "#{@resource}/"
       path = "#{path}/#{@id}" if @id
-      path = "#{path}.#{@format}" if @format && @id
+      path = "#{path}.#{@format}" if @format && @id && !@custom
       path = "#{path}#{@custom.separator}#{@custom.name}" if @custom
       @uri.merge!(path)
 
