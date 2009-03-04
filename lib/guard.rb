@@ -26,7 +26,7 @@ module Resat
         request.send
         r.match(request.get_response_field(@field, @target))
       end
-      @failures << "Guard '#{@name}' timed out waiting for field '#{@field}' with pattern '#{@pattern ? @pattern : '<NONE>'}' from response #{@target}."
+      @failures << "Guard '#{@name}' timed out waiting for field '#{@field}' with pattern '#{@pattern ? @pattern : '<NONE>'}' from response #{@target}." if !Regexp.last_match
     end
   end
 
