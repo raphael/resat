@@ -77,6 +77,7 @@ module Resat
             end
           else
             Variables[ex.variable] = field
+            Variables.mark_for_save(ex.variable) if ex.save
           end
         else
           Log.warn("Extraction from response #{@target} field '#{ex.field}' failed: field not found.")
