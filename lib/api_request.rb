@@ -64,9 +64,12 @@ module Resat
         end
       end
       @request = request_class.new(@uri.to_s)
-      if (@username || Config.username) && (@password || Config.password)
-        @request.basic_auth(@username || Config.username, 
-                            @password || Config.password)
+      username = @username || Config.username
+      Variables.substitute!(username) if username
+      password = @password || Config.password
+      Variables.substitute!(password) if password
+      if username && password 
+        @request.basic_auth(username, password)
       end
       form_data = Hash.new
       @headers.each { |header| @request[header['name']] = header['value'] }
@@ -78,7 +81,7 @@ module Resat
       @oks = @valid_codes.map { |r| r.to_s } if @valid_codes
       @oks ||= %w{200 201 202 203 204 205 206}
      end
-     
+    
     # Actually send the request, call 'prepare' first if it wasn't called yet.
     def send
       http = Net::HTTP.new(@uri.host, @uri.port)
