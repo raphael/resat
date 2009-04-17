@@ -24,6 +24,11 @@ module Resat
     
     # Validate response
     def validate
+      unless @response
+        @failures << "No response to validate."
+        return
+      end
+      
       # 1. Check emptyness
       if @target == 'header'
         if @is_empty != (@response.size == 0)
