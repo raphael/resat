@@ -11,9 +11,9 @@ running the examples.
 
 == How to
 
-  1. Run:: resat scenarios -d user:<your RightScale username> -d pass:<your RightScale password> -d acct:<your RightScale account number>
-  2. See:: cat output.yml
-  3. See more:: vi /tmp/resat.log (or vi resat.log if /tmp does not exist)
+1. Run:: resat scenarios -d user:<your RightScale username> -d pass:<your RightScale password> -d acct:<your RightScale account number>
+2. See:: cat output.yml
+3. See more:: vi /tmp/resat.log (or vi resat.log if /tmp does not exist)
 
 == Additional Examples
 
