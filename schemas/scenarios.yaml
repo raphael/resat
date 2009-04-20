@@ -146,7 +146,5 @@ mapping:
                           "pattern":  { type: str, pattern: /.*\(.*\).*/ }       # Pattern used to extract data (if any)
                           "variable": { type: str, required: yes, unique: yes }  # Variable extracted data should be stored in
                           "save":     { type: bool, default: no }                # Whether variable should be saved in output file
-
-# This last field is to circumvent a bug in the YAML parser that will cause
-# the parsing the loop forever if the last thing in the file is a comment
-  "notused": { type: str }
+                          "export":   { type: bool, default: no }                # Whether variable should be exported so that other
+                                                                                 # scenarios in same execution can use it

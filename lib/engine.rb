@@ -40,7 +40,7 @@ module Resat
         else
           files = [@options.target]
         end
-         files.each do |file|
+          files.each do |file|
           runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, @options.variables, @options.failonerror)
           @ignored_count += 1 if runner.ignored?
           @skipped_count += 1 unless runner.valid?
@@ -57,9 +57,9 @@ module Resat
           end
         end 
       rescue Exception => e
-        Log.error("Something really bad happened#{': ' unless e.message.empty?}#{e.message}")
-        backtrace = e.backtrace.inject("") { |msg, s| msg << "#{s}\n" }
-        Log.fatal("#{e.message}#{': ' unless e.message.empty?}#{backtrace}")
+        Log.error(e.message)
+        backtrace = "   " + e.backtrace.inject("") { |msg, s| msg << "#{s}\n" }
+        Log.debug(backtrace)
       end
     end
 

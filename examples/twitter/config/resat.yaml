@@ -1,0 +1,40 @@
+# Hostname used for API calls
+host:    twitter.com 
+
+# Port
+# port: 443
+
+# Common base URL to all API calls
+base_url: 
+
+# Use HTTPS?
+use_ssl:  yes
+
+# Basic auth username if any
+# Uses variable 'user' from the command line
+username: $user
+
+# Basic auth password if any
+# Uses variable 'pass' from the command line
+password: $pass
+
+# Common request headers for all API calls
+headers:
+# - name:  header_name
+#   value: header_value
+    
+# Common parameters for all API calls
+params:
+# - name:  param_name
+#   value: param_value
+
+# Global variables
+variables:
+  - name:  tweet
+    value: 'Checking out resat (http://tinyurl.com/dg8gf9)'
+    
+# Input file
+# input: input.yml
+
+# Output file
+output: output.yml

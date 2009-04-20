@@ -6,92 +6,96 @@
 
 == Dependencies
 
-  resat relies on Kwalify for validating YAML files:
+resat relies on Kwalify for validating YAML files:
 
-    $ sudo gem install kwalify 
+  $ sudo gem install kwalify 
 
 == Synopsis 
 
-  resat - Web scripting for the masses
-  
-  resat allows running predefined +scenarios+.
-  A scenario consists of HTTP requests optionally followed by guards and
-  filters.
+resat - Web scripting for the masses
 
-  Guards will keep re-sending the same request until the response header and/or
-  body satisfy(ies) certain conditions.
+resat allows running predefined +scenarios+.
+A scenario consists of HTTP requests optionally followed by guards and
+filters.
 
-  Filters will validate the response and/or save some of its elements in
-  variables. Variables can be used to define requests, guards and filters.
+Guards will keep re-sending the same request until the response header and/or
+body satisfy(ies) certain conditions.
 
-  Scenarios are defined as YAML documents that must adhere to the Kwalify
-  schemas defined in schemas/scenarios.yaml. See the comments in this
-  file for additional information.
+Filters will validate the response and/or save some of its elements in
+variables. Variables can be used to define requests, guards and filters.
 
-  resat is configured through a YAML configuration file which defines
-  default values that applies to all requests including the host name,
-  base url, whether to use SSL, common headers and body parameters and
-  optionally a username and password to be used with basic authentication.
-  This configuration file is located in config/resat.yaml by default.
+Scenarios are defined as YAML documents that must adhere to the Kwalify
+schemas defined in schemas/scenarios.yaml. See the comments in this
+file for additional information.
+
+resat is configured through a YAML configuration file which defines
+default values that applies to all requests including the host name,
+base url, whether to use SSL, common headers and body parameters and
+optionally a username and password to be used with basic authentication.
+This configuration file is located in config/resat.yaml by default.
 
 == Installation
   
-  Run the following from this folder to be able to run resat from anywhere:
+Run the following from this folder to be able to run resat from anywhere:
+
   sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
 
 == Why resat?
   
-  There are two main use cases for resat:
-    1. Scripting a serie of REST API calls that can be used to perform common
-       tasks. For example creating a preset deployment or running a set of
-       operational scripts on instances in RightScale.
-    2. API testing: For REST API implementors, resat is the ideal automated
-       regression tool. This is the tool we use at RightScale to test our
-       APIs.
+There are two main use cases for resat:
+  1. Scripting a set of REST API calls that can be used to perform common
+     tasks. For example creating a preset deployment or running a set of
+     operational scripts on instances in RightScale.
+  2. API testing: For REST API implementors, resat is the ideal automated
+     regression tool. This is the tool we use at RightScale to test our
+     APIs.
 
 == How to use
 
-  resat can be used as a ruby library or as an application. Using it as library
-  involves instantiating the engine and calling the 'run' method:
+resat can be used as a ruby library or as an application. Using it as library
+involves instantiating the engine and calling the 'run' method:
 
-    require 'resat'
-    
-    options = OpenStruct.new
-    options.verbose = false
-    options.quiet = false
-    options.norecursion = false
-    options.loglevel = "info"
-    options.logfile = "resat.log"
-    options.configfile = "config/resat.yaml"
-    options.schemasdir = 'schemas'
+  require 'resat'
+  
+  options = OpenStruct.new
+  options.verbose = false
+  options.quiet = false
+  options.norecursion = false
+  options.loglevel = "info"
+  options.logfile = "resat.log"
+  options.configfile = "config/resat.yaml"
+  options.schemasdir = 'schemas'
 
-    Resat::Log.init(options)
-    engine = Resat::Engine.new(options)
-    engine.run
+  Resat::Log.init(options)
+  engine = Resat::Engine.new(options)
+  engine.run
 
-    if engine.succeeded?
-      puts engine.summary.dark_blue
-    else
-      puts engine.summary.dark_red
-    end
-    puts "#{engine.requests_count} request(s)."
-    puts "#{engine.ignored_count} scenario(s) ignored."
-    puts "#{engine.skipped_count} YAML file(s) skipped."
+  if engine.succeeded?
+    puts engine.summary.dark_blue
+  else
+    puts engine.summary.dark_red
+  end
+  puts "#{engine.requests_count} request(s)."
+  puts "#{engine.ignored_count} scenario(s) ignored."
+  puts "#{engine.skipped_count} YAML file(s) skipped."
 
-  See the examples and usage sections below for using resat as an application.
+See the examples and usage sections below for using resat as an application.
 
 == Examples
 
-  Run the scenario defined in scenario.yaml:
-    resat scenario.yaml
+Run the scenario defined in scenario.yaml:
 
-  Execute scenarios defined in the 'scenarios' directory and its
-  sub-directories:
-    resat scenarios
+  resat scenario.yaml
 
-  Only execute the scenarios defined in the current directory, do not execute
-  scenarios found in sub-directories:
-    resat -n .
+Execute scenarios defined in the 'scenarios' directory and its
+sub-directories:
+
+  resat scenarios
+
+Only execute the scenarios defined in the current directory, do not execute
+scenarios found in sub-directories:
+
+  resat -n .
 
 == Usage 
 
@@ -113,6 +117,3 @@
  -s, --schemasdir DIR Path to schemas directory (schemas/ by default)
  -l, --loglevel LVL Log level: debug, info, warn, error (info by default)
  -F, --logfile PATH Log file path (resat.log by default)  
-
-== Author
-   Raphael Simon

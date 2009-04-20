@@ -7,7 +7,8 @@ module Resat
 
   class Variables
     include Singleton
-    attr_reader :vars, :marked_for_save
+
+    attr_reader :vars, :marked_for_save, :exported
 
     # Replace occurrences of environment variables in +raw+ with their value
     def Variables.substitute!(raw)
@@ -46,7 +47,7 @@ module Resat
     end
     
     def Variables.all
-      instance().vars
+      instance().vars.sort
     end
 
     def Variables.load(file, schemasdir)
@@ -83,17 +84,26 @@ module Resat
       @marked_for_save << key
     end      
     
+    # Exported values will be kept even after a call to reset
+    def Variables.export(key)
+      instance().export(key)
+    end
+    def export(key)
+      @exported[key] = @vars[key]
+    end      
+    
     def Variables.reset
       instance().reset
     end
     def reset
-      @vars = Hash.new
+      @vars = @exported.clone
       @marked_for_save = Array.new
     end
 
     protected
 
     def initialize
+      @exported = Hash.new
       reset
       super
     end

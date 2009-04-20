@@ -1,0 +1,14 @@
+# Send Tweet
+# http://twitter.com/statuses/update.format
+name: Send Tweet
+config: ../config/resat.yaml
+steps:
+  - request:
+      resource:  statuses        # Act on the 'notifications' resource
+      custom:                    # Use a custom operation (i.e. not a CRUD operation)
+        name:    update.xml      # Operation name
+        type:    post            # POST request
+      params:
+        - name:  status
+          value: $tweet
+

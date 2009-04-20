@@ -35,10 +35,10 @@ module Resat
       Variables.substitute!(@id) if @id
       uri_class = (@use_ssl || @use_ssl.nil? && Config.use_ssl) ? URI::HTTPS : URI::HTTP
       port = @port || Config.port || uri_class::DEFAULT_PORT
-      @uri = uri_class.build( :host => @host || Config.host, 
-                             :port => port,
-                             :path => @base_url || Config.base_url )
-      path = "#{@resource}/"
+      @uri = uri_class.build( :host => @host || Config.host, :port => port )
+      base_url = "/#{@base_url || Config.base_url}/".squeeze('/')
+      Variables.substitute!(base_url)
+      path = "#{base_url}#{@resource}"
       path = "#{path}/#{@id}" if @id
       path = "#{path}.#{@format}" if @format && @id && !@custom
       path = "#{path}#{@custom.separator}#{@custom.name}" if @custom
@@ -106,8 +106,8 @@ module Resat
     def has_response_field?(field, target)
       return unless @response
       return @response.key?(field) if target == 'header'
-      doc = REXML::Document.new(@response.body)
-      return !doc.elements[field].nil?
+      doc = REXML::Document.new(@response.body) rescue nil
+      return doc && !doc.elements[field].nil?
     end
     
     # Get value of response header or body field

@@ -49,9 +49,6 @@
 #   -l, --loglevel LVL    Log level: debug, info, warn, error (info by default)
 #   -F, --logfile PATH    Log file path (resat.log by default)
 #
-# === Author
-#   Raphael Simon
-#
 
 require 'rubygems'
 require 'optparse' 
@@ -79,15 +76,18 @@ module Resat
       @options.config = nil
       @options.schemasdir =  File.join(File.dirname(THIS_FILE), 'schemas')
       @options.loglevel = "info"
-      @options.logfile = "resat.log"
+      @options.logfile = "/tmp/resat.log"
     end
 
     # Parse options, check arguments, then run tests
     def run
       if parsed_options? && arguments_valid?
-        output_options if @options.verbose
-        tms = Benchmark.measure { run_tests }
-        Log.info tms.format("\t\tUser\t\tSystem\t\tReal\nDuration:\t%u\t%y\t%r")
+        begin
+          tms = Benchmark.measure { run_tests }
+          Log.info tms.format("\t\tUser\t\tSystem\t\tReal\nDuration:\t%u\t%y\t%r")
+        rescue Exception => e
+          puts "Error: #{e.message}"
+        end
       else
         output_usage
         @return_value = 1
@@ -147,13 +147,6 @@ module Resat
       @options.target = ARGV[0] unless ARGV.empty? # We'll catch that later
     end
 
-    def output_options
-      puts "Options:".blue
-      @options.marshal_dump.each do |name, val|
-        puts "  #{name}".dark_blue + " = #{val}"
-      end
-    end
-
     # Check arguments
     def arguments_valid?
       valid = ARGV.size == 1
@@ -191,6 +184,11 @@ module Resat
 
     def run_tests
       Log.init(@options)
+      opts = "-" * 80 +  "\nOptions:"
+      @options.marshal_dump.each do |name, val|
+        opts += "\n  #{name} = #{val.inspect}"
+      end
+      Log.info opts
       engine = Engine.new(@options)
       engine.run
       if engine.succeeded?

@@ -1,0 +1,33 @@
+== Synopsis
+
+This example uses the Twitter REST API:
+
+  http://apiwiki.twitter.com/REST+API+Documentation
+
+*Please note*: This example will send a tweet on your behalf with the text:
+'Checking out resat (http://tinyurl.com/dg8gf9)' by default.
+Override the default text in the 'config/resat.yaml' file or via the command
+line:
+
+  ++resat scenarios -d tweet:'My custom tweet' -d user:... -d pass:...++
+
+See the main README.rdoc for instructions on how to setup resat prior to
+running the examples.
+
+== How to
+
+  1. Run:: resat scenarios -d user:<your twitter username> -d pass:<your twitter password>
+  2. See:: cat output.yml
+  3. See more:: vi /tmp/resat.log (or vi resat.log if /tmp does not exist)
+
+== Additional Examples
+
+The 'additional' folder contains two additional scenarios which are not ran
+by default:
+  * ++follow.yml++:: Follow given user
+  * ++send_message++:: Send direct message to given user with given content
+
+Both these scenarios require inputs. Inputs are given using the ++--define++
+(or ++-d++) resat option:
+
+  ++resat additional/follow -d followed:rgsimon++

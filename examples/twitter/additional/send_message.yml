@@ -1,0 +1,19 @@
+# Send direct message to username specified on command line
+# Note: user must be following you otherwise the request returns 403.
+#
+# Usage:
+#   resat send_message -d to:rgsimon -d text:'Hello from resat!'
+
+name: Send Direct Message
+config: ../config/resat.yaml
+steps:
+  - request:
+      resource:  direct_messages  # Act on the 'direct_messages' resource
+      custom:                     # Use a custom operation (i.e. not a CRUD operation)
+        name:    new.xml          # Operation name
+        type:    post             # POST request
+      params:
+        - name:  user             # 'user' parameter
+          value: $to              # Username 
+        - name:  text             # 'text' parameter
+          value: $text            # Message content

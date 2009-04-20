@@ -1,0 +1,48 @@
+# Create new Rails all-in-one server in default deployment
+name: Create Rails Server
+steps:
+  - request:                     # Step 1. Retrieve default deployment
+      operation:      index
+      resource:       deployments
+      valid_codes:
+        - 200 
+    filters:
+      - name:         Get default deployment
+        target:       body
+        extractors:
+          - field:    deployments/deployment/href
+            variable: deployment
+
+  - request:                     # Step 2. Retrieve Rails template
+      operation:      index
+      resource:       server_templates
+    filters:
+      - name:         Get Rails server template
+        target:       body
+        extractors:
+          - field:    server-templates/ec2-server-template[nickname='Rails all-in-one-developer v8']/href
+            variable: server_template
+
+  - request:                     # Step 3. Create server
+      operation:      create
+      resource:       servers
+      valid_codes:
+        - 201
+      params:
+        - name:       server[nickname]
+          value:      'Resat Rails Server'
+        - name:       server[server_template_href]
+          value:      $server_template
+        - name:       server[deployment_href]
+          value:      $deployment
+    filters:
+      - name:         validate server response
+        target:       body
+        is_empty:     true
+      - name:         Get server id
+        target:       header
+        extractors:
+          - field:    location
+            pattern:  '.*\/(\d+)$'
+            variable: server_id
+            export:   true     # Export id to other scenarios

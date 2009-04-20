@@ -1,0 +1,13 @@
+# Delete previously created server
+name: Delete Rails Server
+steps:
+  - request:
+      operation:      destroy
+      resource:       servers
+      id:             $server_id
+      valid_codes:
+        - 200
+    filters:
+      - name:         validate destroy response
+        target:       body
+        is_empty:     true

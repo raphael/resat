@@ -8,7 +8,7 @@ require 'logger'
 # e.g.: puts "Hello".red
 class String
   def bold; colorize(self, "\e[1m\e[29m"); end
-  def grey; colorize(self, "\e[1m\e[30m"); end
+  def grey; colorize(self, "\e[30m"); end
   def red; colorize(self, "\e[1m\e[31m"); end
   def dark_red; colorize(self, "\e[31m"); end
   def green; colorize(self, "\e[1m\e[32m"); end
@@ -26,6 +26,7 @@ end
 module Resat
 
   class LogFormatter
+    
     def call(severity, time, progname, msg)
       msg.gsub!("\n", "\n   ")
       res = ""
@@ -37,40 +38,44 @@ module Resat
 
   class Log
 
+    LEVELS = %w{ debug info warn error fatal }
+    
     # Initialize singleton instance
     def Log.init(options)
       File.delete(options.logfile) rescue nil
+      options.logfile = 'resat.log' unless File.directory?(File.dirname(options.logfile))
       @logger = Logger.new(options.logfile)
       @logger.formatter = LogFormatter.new
-      case options.loglevel
-        when 'debug' then @logger.level = Logger::DEBUG
-        when 'info'  then @logger.level = Logger::INFO
-        when 'warn'  then @logger.level = Logger::WARN
-        when 'error' then @logger.level = Logger::ERROR
-        else              @logger.level = Logger::WARN # default to warning
-      end
+      @level = LEVELS.index(options.loglevel.downcase) if options.loglevel
+      @level = Logger::WARN unless @level # default to warning
+      @logger.level = @level
       @verbose = options.verbose
       @quiet = options.quiet
     end 
+    
+    def Log.debug(debug)
+      @logger.debug { debug } if @logger
+      puts "\n#{debug}".grey if @level == Logger::DEBUG
+    end
 
     def Log.info(info)
-      @logger.info { info } if @logger
       puts "\n#{info}".dark_green if @verbose
+      @logger.info { info } if @logger
     end
     
     def Log.warn(warning)
-      @logger.warn { warning } if @logger
       puts "\nWarning: #{warning}".yellow unless @quiet
+      @logger.warn { warning } if @logger
     end
     
     def Log.error(error)
-      @logger.error { error } if @logger
       puts "\nError: #{error}".dark_red
+      @logger.error { error } if @logger
     end
 
     def Log.fatal(fatal)
-      @logger.fatal { fatal } if @logger
       puts "\nCrash: #{fatal}".red
+      @logger.fatal { fatal } if @logger
     end
     
     def Log.request(request)

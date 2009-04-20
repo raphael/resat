@@ -1,0 +1,31 @@
+# Retrieve public and private recent tweets
+#
+# http://twitter.com/statuses/public_timeline.format
+# http://twitter.com/statuses/public_timeline.format
+name: Twitter Timelines
+config: ../config/resat.yaml
+steps:
+  - request:
+      resource:  statuses
+      custom:                         # Use a custom operation (i.e. not a CRUD operation)
+        name:    public_timeline.xml  # Operation name
+        type:    get                  # GET request
+    filters:
+      - name: extract latest public tweet
+        target: body
+        extractors:
+          - field:    statuses/status/text
+            variable: last public tweet
+            save:     yes
+  - request:
+      resource:  statuses
+      custom:                         # Use a custom operation (i.e. not a CRUD operation)
+        name:    friends_timeline.xml # Operation name
+        type:    get                  # GET request
+    filters:
+      - name: extract latest friends tweet
+        target: body
+        extractors:
+          - field:    statuses/status/text
+            variable: last friends tweet
+            save:     yes

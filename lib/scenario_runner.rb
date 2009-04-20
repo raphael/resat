@@ -89,7 +89,7 @@ module Resat
       scenario = parser.parse_file(doc)
       if parser.errors.empty?
         @ignored = !scenario || scenario.ignore
-        @cfg_file = scenario.config
+        @cfg_file = File.expand_path(File.join(File.dirname(doc), scenario.config)) if scenario.config
         unless @ignored
           @name = scenario.name
           @steps = Array.new

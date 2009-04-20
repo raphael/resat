@@ -1,0 +1,9 @@
+# List servers in default deployment
+name: List servers
+steps:
+  - request:
+      operation: index
+      resource:  servers
+      valid_codes:
+        - 200
+      

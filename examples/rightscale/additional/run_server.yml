@@ -1,0 +1,75 @@
+# This scenario will launch an All-in-on Rails server, wait for it to become
+# operational, run a RightScript (Mongrels restart) and then stop the server,
+# wait for it to be stopped and delete it.
+#
+# Note: This scenario reuses the 'create_server' scenario to create the 
+# Rails All-in-one server.
+#
+name: Launch rails servers and run RightScript
+includes:
+  - ../scenarios/create_server
+steps:
+  - request:                    # Step 1. Start server
+      resource:       servers
+      id:             $server_id
+      custom:
+        name:         start
+        type:         post
+
+  - request:                    # Step 2. Retrieve Mongrels restart RightScript
+      operation:      index
+      resource:       right_scripts
+    filters:
+      - name:         Get Rails server template
+        target:       body
+        extractors:
+          - field:    right-scripts/right-script[name='RB mongrel_cluster (re)start v1']/href
+            variable: right_script_id
+
+  - request:                    # Step 3. Wait for server to become operational
+      resource:       servers
+      id:             $server_id
+      operation:      show
+    guards:
+      - name:         Wait for operational state
+        target:       body
+        field:        server/state
+        pattern:      "operational"
+        period:       10
+        timeout:      900
+
+  - request:                    # Step 4. Restart Mongrels
+      resource:       servers
+      id:             $server_id
+      custom:
+        name:         run_script
+        type:         post
+      params:
+        - name:       right_script
+          value:      $right_script_id
+
+  - request:                    # Step 5. Stop server
+      resource:       servers
+      id:             $server_id
+      custom:
+        name:         stop
+        type:         post
+
+  - request:                    # Step 6. Wait for server to become stopped
+      resource:       servers
+      id:             $server_id
+      operation:      show
+    guards:
+      - name:         Wait for stop state
+        target:       body
+        field:        server/state
+        pattern:      "stopped"
+        period:       10
+        timeout:      900
+ 
+  - request:                    # Step 7. Now delete the server
+      operation:      destroy
+      resource:       servers
+      id:             $server_id
+
+

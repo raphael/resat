@@ -76,14 +76,14 @@ module Resat
             Regexp.new(ex.pattern).match(field)
             if Regexp.last_match
               Variables[ex.variable] = Regexp.last_match(1)
-              Variables.mark_for_save(ex.variable) if ex.save
             else
               Log.warn("Extraction from response #{@target} field '#{ex.field}' ('#{field}') with pattern '#{ex.pattern}' failed.")
             end
           else
             Variables[ex.variable] = field
-            Variables.mark_for_save(ex.variable) if ex.save
           end
+          Variables.mark_for_save(ex.variable) if ex.save
+          Variables.export(ex.variable) if ex.export
         else
           Log.warn("Extraction from response #{@target} field '#{ex.field}' failed: field not found.")
         end
@@ -103,6 +103,7 @@ module Resat
     include Kwalify::Util::HashLike
     attr_accessor :field, :pattern, :variable
     def save; @save || false; end
+    def export; @export || false; end
   end
  
 end

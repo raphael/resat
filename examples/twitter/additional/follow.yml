@@ -1,0 +1,15 @@
+# Follow username specified on command line
+#
+# Usage:
+#   resat follow -d followed:rgsimon
+
+name: Follow given user
+config: ../config/resat.yaml
+steps:
+  - request:
+      resource:  notifications        # Act on the 'notifications' resource
+      custom:                         # Use a custom operation (i.e. not a CRUD operation)
+        name:    follow               # Operation name
+        type:    post                 # POST request
+      id:        $followed            # ID of user to follow
+      format:    xml                  # Get response in XML format

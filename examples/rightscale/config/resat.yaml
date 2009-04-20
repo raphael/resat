@@ -1,0 +1,34 @@
+# Hostname used for API calls
+host:    moo.rightscale.com 
+
+# Port
+# port: 443
+
+# Common base URL to all API calls
+base_url: api/acct/$acct
+
+# Use HTTPS?
+use_ssl:  yes
+
+# Basic auth username if any
+username: $user
+
+# Basic auth password if any
+password: $pass
+
+# Common request headers for all API calls
+headers:
+  - name:  X-API-VERSION
+    value: '1.0'
+    
+# Common parameters for all API calls
+params:
+
+# Global variables
+variables:
+    
+# Input file
+#input: variables.yml
+
+# Output file
+#output: variables.yml
