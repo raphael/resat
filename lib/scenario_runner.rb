@@ -34,7 +34,7 @@ module Resat
         if @valid
           Variables.reset
           Variables.load(Config.input, schemasdir) if Config.input
-          Config.variables.each { |v| Variables[v['name']] = v['value'] }
+          Config.variables.each { |v| Variables[v['name']] = v['value'] } if Config.variables
           variables.each { |k, v| Variables[k] = v } if variables
         end
       end
