@@ -56,11 +56,12 @@ module Resat
       validator = Kwalify::Validator.new(schema)
       parser = Kwalify::Yaml::Parser.new(validator)
       serialized_vars = parser.parse_file(file)
+      parser.errors.push(Kwalify::ValidationError.new("No variables defined")) unless serialized_vars
       if parser.errors.empty?
         vars = instance().vars
         serialized_vars.each { |v| vars[v['name']] = v['value'] }
       else
-        Log.warning("Error loading variables from '#{file}': #{KwalifyHelper.parser_error(parser)}")
+        Log.warn("Error loading variables from '#{file}': #{KwalifyHelper.parser_error(parser)}")
       end
     end
     
