@@ -7,19 +7,19 @@ require 'logger'
 # Add ability to output colored text to console
 # e.g.: puts "Hello".red
 class String
-  def bold; colorize(self, "\e[1m\e[29m"); end
-  def grey; colorize(self, "\e[30m"); end
-  def red; colorize(self, "\e[1m\e[31m"); end
-  def dark_red; colorize(self, "\e[31m"); end
-  def green; colorize(self, "\e[1m\e[32m"); end
-  def dark_green; colorize(self, "\e[32m"); end
-  def yellow; colorize(self, "\e[1m\e[33m"); end
-  def blue; colorize(self, "\e[1m\e[34m"); end
-  def dark_blue; colorize(self, "\e[34m"); end
-  def pur; colorize(self, "\e[1m\e[35m"); end
-  def colorize(text, color_code)  
+  def bold; colorize("\e[1m\e[29m"); end
+  def grey; colorize("\e[30m"); end
+  def red; colorize("\e[1m\e[31m"); end
+  def dark_red; colorize("\e[31m"); end
+  def green; colorize("\e[1m\e[32m"); end
+  def dark_green; colorize("\e[32m"); end
+  def yellow; colorize("\e[1m\e[33m"); end
+  def blue; colorize("\e[1m\e[34m"); end
+  def dark_blue; colorize("\e[34m"); end
+  def pur; colorize("\e[1m\e[35m"); end
+  def colorize(color_code)  
     # Doesn't work with the Windows prompt...
-    RUBY_PLATFORM =~ /(win|w)32$/ ? text : "#{color_code}#{text}\e[0m" 
+    RUBY_PLATFORM =~ /(win|w)32$/ ? to_s : "#{color_code}#{to_s}\e[0m" 
   end
 end
 
