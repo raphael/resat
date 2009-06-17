@@ -109,8 +109,9 @@ mapping:
                 class: Resat::Guard
                 mapping:
                   "name":    { type: str, required: yes }
-                  "target":  { enum: [header, body], required: yes }             # Guard target (response header or body)
-                  "field":   { type: str, required: yes }                        # Field guard applies to
+                  "target":  { enum: [header, body] }                            # Guard target (response header or body)
+                  "field":   { type: str }                                       # Field guard applies to
+                  "status":  { type: int }
                   "pattern": { type: str }                                       # Pattern field should match if any
                   "period":  { type: int, default: 5 }                           # Period between API requests
                   "timeout": { type: int, default: 120 }                         # Guard timeout 
