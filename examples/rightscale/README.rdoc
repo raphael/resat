@@ -27,7 +27,7 @@ running the examples.
 
     $ vi resat.log
 
-if <tt>/tmp</tt> does not exist
+  if <tt>/tmp</tt> does not exist
 
 = Additional Examples
 
