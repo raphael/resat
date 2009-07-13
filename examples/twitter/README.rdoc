@@ -30,9 +30,9 @@ running the examples.
 
     $ vi /tmp/resat.log
 
-or
+  or
 
-  $ vi resat.log
+    $ vi resat.log
 
 if <tt>/tmp</tt> does not exist
 
