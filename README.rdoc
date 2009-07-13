@@ -44,29 +44,29 @@ There are two main use cases for resat:
 resat can be used as a ruby library or as an application. Using it as library
 involves instantiating the engine and calling the 'run' method:
 
-  require 'resat'
+ require 'resat'
 
-  options = OpenStruct.new
-  options.verbose     = false
-  options.quiet       = false
-  options.norecursion = false
-  options.loglevel    = 'info'
-  options.logfile     = 'resat.log'
-  options.configfile  = 'config/resat.yaml'
-  options.schemasdir  = 'schemas'
+ options             = OpenStruct.new
+ options.verbose     = false
+ options.quiet       = false
+ options.norecursion = false
+ options.loglevel    = 'info'
+ options.logfile     = 'resat.log'
+ options.configfile  = 'config/resat.yaml'
+ options.schemasdir  = 'schemas'
 
-  Resat::Log.init(options)
-  engine = Resat::Engine.new(options)
-  engine.run
+ Resat::Log.init(options)
+ engine = Resat::Engine.new(options)
+ engine.run
 
-  if engine.succeeded?
-    puts engine.summary.dark_blue
-  else
-    puts engine.summary.dark_red
-  end
-  puts "#{engine.requests_count} request(s)."
-  puts "#{engine.ignored_count} scenario(s) ignored."
-  puts "#{engine.skipped_count} YAML file(s) skipped."
+ if engine.succeeded?
+   puts engine.summary.dark_blue
+ else
+   puts engine.summary.dark_red
+ end
+ puts "#{engine.requests_count} request(s)."
+ puts "#{engine.ignored_count} scenario(s) ignored."
+ puts "#{engine.skipped_count} YAML file(s) skipped."
 
 See the examples and usage sections below for using resat as an application.
 
@@ -74,23 +74,23 @@ See the examples and usage sections below for using resat as an application.
 
 Run the scenario defined in scenario.yaml:
 
-  resat scenario.yaml
+ $ resat scenario.yaml
 
 Execute scenarios defined in the 'scenarios' directory and its
 sub-directories:
 
-  resat scenarios
+ $ resat scenarios
 
 Only execute the scenarios defined in the current directory, do not execute
 scenarios found in sub-directories:
 
-  resat -n .
+ $ resat -n .
 
 == Usage
 
-  resat [options] target
+ resat [options] target
 
-  For help use: resat -h
+ For help use: resat -h
 
 == Options
 
@@ -112,7 +112,7 @@ scenarios found in sub-directories:
 Run the following command from the current folder to be able to run resat from
 anywhere:
 
-  sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+ $ sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
 
 = DEVELOPMENT
 
@@ -120,7 +120,7 @@ anywhere:
 
 The source code of Resat is available via Git:
 
-  $ git clone git://github.com/raphael/resat.git
+ $ git clone git://github.com/raphael/resat.git
 
 * http://github.com/raphael/resat.git
 
@@ -128,7 +128,7 @@ The source code of Resat is available via Git:
 
 resat relies on Kwalify for validating YAML files:
 
-  $ sudo gem install kwalify
+ $ sudo gem install kwalify
 
 * http://www.kuwata-lab.com/kwalify/
 
@@ -140,11 +140,11 @@ of Resat can apply to multiple scenarios (all scenarios in a given folder).
 
 A simple scenario containing a single step is defined below:
 
-  name: List all servers
-  steps:
-    - request:
-        operation: index
-        resource:  servers
+ name: List all servers
+ steps:
+   - request:
+       operation: index
+       resource:  servers
 
 The first element of the scenario is its name. The name is used by the command
 line tool for update and error outputs.
@@ -157,43 +157,43 @@ and <i>destroy</i>.
 Operations that apply to a single resource rather than to all resources require
 the <i>id</i> element:
 
-  name: Show server 42
-  steps:
-    - request:
-        operation: show
-        resource:  servers
-        id:        42
+ name: Show server 42
+ steps:
+   - request:
+       operation: show
+       resource:  servers
+       id:        42
 
 Resat also allows defining <i>custom</i> requests for making web requests that
 don't map to a CRUD operation. A custom request is defined by a <i>type</i>
 corresponding to the HTTP verb that the request should use (i.e. <tt>get</tt>, <tt>post</tt>,
 <tt>put</tt> or <tt>delete</tt>) and its name.
 
-  name: Twitter Timelines
-  steps:
-    - request:
-        resource:  statuses
-        custom:                         # Use a custom operation
-          name:    public_timeline.xml  # Operation name
-          type:    get                  # GET request
+ name: Twitter Timelines
+ steps:
+   - request:
+       resource:  statuses
+       custom:                         # Use a custom operation
+         name:    public_timeline.xml  # Operation name
+         type:    get                  # GET request
 
 Requests can then be followed by filters which can validate the response and/or
 extract elements from it.
 
-  name: Get Mephisto ServerTemplate
-  steps:
-    - request:
-        operation:      index
-        resource:       server_templates
-      filters:
-        - name:         get server template href
-          target:       body
-          validators:
-            - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
-              is_empty: false
-          extractors:
-            - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
-              variable: server_template_href
+ name: Get Mephisto ServerTemplate
+ steps:
+   - request:
+       operation:      index
+       resource:       server_templates
+     filters:
+       - name:         get server template href
+         target:       body
+         validators:
+           - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
+             is_empty: false
+         extractors:
+           - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
+             variable: server_template_href
 
 Variables that are extracted from a request response can then be used for
 other requests, filters or guards. A variable is used using the <tt>$</tt> sign
@@ -214,30 +214,30 @@ the XPATH associated with the extractor.
 <b>Note</b>: Because XPATH is used to define fields in extractors and
 validators, only requests that return XML can be followed by filters.
 
-  name: Create Mephisto Server
-  steps:
-    - request:
-        operation:      create
-        resource:       servers
-        valid_codes:
-          - 201
-        params:
-          - name:       server[nickname]
-            value:      'resat created server'
-          - name:       server[server_template_href]
-            value:      $server_template_href
-          - name:       server[deployment_href]
-            value:      $deployment_href
-      filters:
-        - name:         validate server response
-          target:       body
-          is_empty:     true
-        - name:         extract server id
-          target:       header
-          extractors:
-            - field:    location
-              pattern:  '.*\/(\d+)$'
-              variable: server_id
+ name: Create Mephisto Server
+ steps:
+   - request:
+       operation:      create
+       resource:       servers
+       valid_codes:
+         - 201
+       params:
+         - name:       server[nickname]
+           value:      'resat created server'
+         - name:       server[server_template_href]
+           value:      $server_template_href
+         - name:       server[deployment_href]
+           value:      $deployment_href
+     filters:
+       - name:         validate server response
+         target:       body
+         is_empty:     true
+       - name:         extract server id
+         target:       header
+         extractors:
+           - field:    location
+             pattern:  '.*\/(\d+)$'
+             variable: server_id
 
 A scenario request can also use <i>guards</i>. A guard identifies a response
 element similarly to an extractor (response header or body field identified by
@@ -246,19 +246,19 @@ the element must match together with a period and a timeout that should be used
 to retry the request until the value matches the guard or the timeout is
 reached.
 
-  name: Wait until server 42 is operational
-  steps:
-    - request:
-        resource:  servers
-        id:        42
-        operation: show
-      guards:
-        - target:  body
-          field:   server/state
-          pattern: 'operational'
-          period:  10
-          timeout: 300
-          name:    server operational
+ name: Wait until server 42 is operational
+ steps:
+   - request:
+       resource:  servers
+       id:        42
+       operation: show
+     guards:
+       - target:  body
+         field:   server/state
+         pattern: 'operational'
+         period:  10
+         timeout: 300
+         name:    server operational
 
 = ADDITIONAL RESOURCES
 
