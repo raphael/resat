@@ -1,54 +1,38 @@
-== Where to get resat
+= Resat - Web scripting for the masses
 
-  The source code is available via Git:
+= DESCRIPTION
 
-    $ git clone git://github.com/raphael/resat.git
+== Synopsis
 
-== Dependencies
+Resat is a script engine which allows grouping web requests into <b>scenarios</b>.
+A scenario consists of serie of HTTP requests called <b>steps</b>.
+Each step may be associated with <b>guards</b> and/or <b>filters</b>.
 
-resat relies on Kwalify for validating YAML files:
+* Guards keep making the same request until the response header and/or body
+  satisfy(ies) certain conditions.
 
-  $ sudo gem install kwalify 
-
-== Synopsis 
-
-resat - Web scripting for the masses
-
-resat allows running predefined +scenarios+.
-A scenario consists of HTTP requests optionally followed by guards and
-filters.
-
-Guards will keep re-sending the same request until the response header and/or
-body satisfy(ies) certain conditions.
-
-Filters will validate the response and/or save some of its elements in
-variables. Variables can be used to define requests, guards and filters.
+* Filters validate the response and may save some of its elements in variables.
+  Variables can be used to define requests, guards and filters.
 
 Scenarios are defined as YAML documents that must adhere to the Kwalify
-schemas defined in schemas/scenarios.yaml. See the comments in this
+schemas defined in <tt>schemas/scenarios.yaml</tt>. See the comments in this
 file for additional information.
 
-resat is configured through a YAML configuration file which defines
+Resat is configured through a YAML configuration file which defines
 default values that applies to all requests including the host name,
 base url, whether to use SSL, common headers and body parameters and
 optionally a username and password to be used with basic authentication.
-This configuration file is located in config/resat.yaml by default.
-
-== Installation
-  
-Run the following from this folder to be able to run resat from anywhere:
-
-  sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+This configuration file is located in <tt>config/resat.yaml</tt> by default.
 
 == Why resat?
-  
+
 There are two main use cases for resat:
-  1. Scripting a set of REST API calls that can be used to perform common
-     tasks. For example creating a preset deployment or running a set of
-     operational scripts on instances in RightScale.
-  2. API testing: For REST API implementors, resat is the ideal automated
-     regression tool. This is the tool we use at RightScale to test our
-     APIs.
+
+ 1. Scripting: Resat can be used to chaing together a serie of REST API calls
+    that can be used to perform repetitive tasks.
+
+ 2. API testing: For REST API implementors, resat is the ideal automated
+    regression tool. This is the tool we use at RightScale to test our APIs.
 
 == How to use
 
@@ -56,15 +40,15 @@ resat can be used as a ruby library or as an application. Using it as library
 involves instantiating the engine and calling the 'run' method:
 
   require 'resat'
-  
+
   options = OpenStruct.new
-  options.verbose = false
-  options.quiet = false
+  options.verbose     = false
+  options.quiet       = false
   options.norecursion = false
-  options.loglevel = "info"
-  options.logfile = "resat.log"
-  options.configfile = "config/resat.yaml"
-  options.schemasdir = 'schemas'
+  options.loglevel    = 'info'
+  options.logfile     = 'resat.log'
+  options.configfile  = 'config/resat.yaml'
+  options.schemasdir  = 'schemas'
 
   Resat::Log.init(options)
   engine = Resat::Engine.new(options)
@@ -97,7 +81,7 @@ scenarios found in sub-directories:
 
   resat -n .
 
-== Usage 
+== Usage
 
   resat [options] target
 
@@ -116,4 +100,27 @@ scenarios found in sub-directories:
  -c, --config PATH Config file path (config/resat.yaml by default)
  -s, --schemasdir DIR Path to schemas directory (schemas/ by default)
  -l, --loglevel LVL Log level: debug, info, warn, error (info by default)
- -F, --logfile PATH Log file path (resat.log by default)  
+ -F, --logfile PATH Log file path (resat.log by default)
+
+= INSTALLATION
+
+Run the following command from the current folder to be able to run resat from
+anywhere:
+
+  sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+
+= DEVELOPMENT
+
+== Source
+
+The source code of Resat is available via Git:
+
+  $ git clone git://github.com/raphael/resat.git
+
+* http://github.com/raphael/resat.git
+
+== Dependencies
+
+resat relies on Kwalify for validating YAML files:
+
+  $ sudo gem install kwalify
