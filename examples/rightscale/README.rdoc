@@ -1,4 +1,4 @@
-== Synopsis
+= Synopsis
 
 This example uses the RightScale REST API:
 http://wiki.rightscale.com/2._References/01-RightScale/03-RightScale_API
@@ -9,15 +9,31 @@ This example will list all your servers, create a new server using the
 See the main README.rdoc for instructions on how to setup resat prior to
 running the examples.
 
-== How to
+= How to
 
-1. Run:: resat scenarios -d user:<your RightScale username> -d pass:<your RightScale password> -d acct:<your RightScale account number>
-2. See:: cat output.yml
-3. See more:: vi /tmp/resat.log (or vi resat.log if /tmp does not exist)
+1. Run:
 
-== Additional Examples
+  resat scenarios -d user:<your RightScale username> -d pass:<your RightScale password> -d acct:<your RightScale account number>
 
-The 'run_server' example in the 'additional' folder will create and launch a
-server in the 'default' deployment and wait until it's operational before
-running an operational script on it. It will then stop and delete it. See the
-file 'additional/run_server.yml' for additional information.
+2. See:
+
+  $ cat output.yml
+
+3. See more:
+
+  $ vi /tmp/resat.log
+
+  or
+
+  $ vi resat.log
+
+  if <tt>/tmp</tt> does not exist
+
+= Additional Examples
+
+The <i>run_server</i> example in the <i>additional</i> folder will create and
+launch a server in the <i>default</i> deployment and wait until it's
+operational before running an operational script on it. It will then stop and
+delete it. See the file <tt>additional/run_server.yml</tt>
+(http://github.com/raphael/resat/blob/master/examples/rightscale/additional/run_server.yml) 
+for additional information.
