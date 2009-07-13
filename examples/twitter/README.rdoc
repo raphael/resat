@@ -42,7 +42,7 @@ The <i>additional</i> folder contains two additional scenarios which are not ran
 by default:
 
 * <tt>follow.yml</tt>: Follow given user
-* <tt>send_message</tt>: Send direct message to given user with given content
+* <tt>send_message.yml</tt>: Send direct message to given user with given content
 
 Both these scenarios require inputs. Inputs are given using the <tt>--define</tt>
 (or <tt>-d</tt>) resat option:
