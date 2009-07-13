@@ -11,7 +11,7 @@ http://apiwiki.twitter.com/REST+API+Documentation
 by default. Override the default text in the <tt>config/resat.yaml</tt> file or
 via the command line:
 
-  resat scenarios -d tweet:'My custom tweet' -d user:... -d pass:...
+  $ resat scenarios -d tweet:'My custom tweet' -d user:... -d pass:...
 
 See the main README.rdoc for instructions on how to setup resat prior to
 running the examples.
@@ -20,7 +20,7 @@ running the examples.
 
 * Run:
 
-    resat scenarios -d user:<your twitter username> -d pass:<your twitter password>
+    $ resat scenarios -d user:<your twitter username> -d pass:<your twitter password>
 
 * See:
 
@@ -47,4 +47,4 @@ by default:
 Both these scenarios require inputs. Inputs are given using the <tt>--define</tt>
 (or <tt>-d</tt>) resat option:
 
-  resat additional/follow -d followed:rgsimon
+  $ resat additional/follow -d followed:rgsimon

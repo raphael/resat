@@ -13,7 +13,7 @@ running the examples.
 
 * Run:
 
-    resat scenarios -d user:<your RightScale username> -d pass:<your RightScale password> -d acct:<your RightScale account number>
+    $ resat scenarios -d user:<your RightScale username> -d pass:<your RightScale password> -d acct:<your RightScale account number>
 
 * See:
 
