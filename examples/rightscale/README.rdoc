@@ -23,11 +23,11 @@ running the examples.
 
   $ vi /tmp/resat.log
 
-  or
+or
 
   $ vi resat.log
 
-  if <tt>/tmp</tt> does not exist
+if <tt>/tmp</tt> does not exist
 
 = Additional Examples
 
