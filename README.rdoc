@@ -5,8 +5,13 @@
 == Synopsis
 
 Resat is a script engine which allows grouping web requests into <b>scenarios</b>.
+
 A scenario consists of serie of HTTP requests called <b>steps</b>.
+
 Each step may be associated with <b>guards</b> and/or <b>filters</b>.
+
+The syntax used to defined scenarios is simple and can be used by programmers and
+non-programmers alike. See the WRITING SCENARIOS section below for examples.
 
 * Guards keep making the same request until the response header and/or body
   satisfy(ies) certain conditions.
@@ -126,3 +131,130 @@ resat relies on Kwalify for validating YAML files:
   $ sudo gem install kwalify
 
 * http://www.kuwata-lab.com/kwalify/
+
+= WRITING SCENARIOS
+
+At the heart of your resat scripts are the scenarios. A scenario consists of
+one or more steps. A scenario may include other scenarios. A single execution
+of Resat can apply to multiple scenarios (all scenarios in a given folder).
+
+A simple scenario containing a single step is defined below:
+
+  name: List all servers
+  steps:
+    - request:
+        operation: index
+        resource:  servers
+
+The first element of the scenario is its name. The name is used by the command
+line tool for update and error outputs.
+The secone element is the list of steps. A step must contain a request. A
+request corresponds to one of the REST CRUD operations and applies to a
+resource. CRUD operations are <i>create</i>, <i>show</i>, <i>index</i>, <i>update</i>,
+and <i>destroy</i>.
+
+Operations that apply to a single resource rather than to all resources require
+the <i>id</i> element:
+
+  name: Show server 42
+  steps:
+    - request:
+        operation: show
+        resource:  servers
+        id:        42
+
+Resat also allows defining <i>custom</i> requests for making web requests that
+don't map to a CRUD operation. A custom request is defined by a <i>type</i>
+corresponding to the HTTP verb that the request should use (i.e. <tt>get</tt>, <tt>post</tt>,
+<tt>put</tt> or <tt>delete</tt>) and its name.
+
+  name: Twitter Timelines
+  steps:
+    - request:
+        resource:  statuses
+        custom:                         # Use a custom operation
+          name:    public_timeline.xml  # Operation name
+          type:    get                  # GET request
+
+Requests can then be followed by filters which can validate the response and/or
+extract elements from it.
+
+  name: Get Mephisto ServerTemplate
+  steps:
+    - request:
+        operation:      index
+        resource:       server_templates
+      filters:
+        - name:         get server template href
+          target:       body
+          validators:
+            - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
+              is_empty: false
+          extractors:
+            - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
+              variable: server_template_href
+
+Variables that are extracted from a request response can then be used for
+other requests, filters or guards. A variable is used using the <tt>$</tt> sign
+followed by the variable name. A variable may be written to an output file if
+it has the <i>save</i> element and the configuration file defines an output
+file. A variable can also be exported to other scenarios that will get run in
+the same Resat execution (so a scenario can create resources and save their ids
+and a following scenario can reuse the ids to delete or update the resources).
+
+The element to extract can be a response header or a response body field. If it
+is a response body field then an XPATH query is used to identity which part of
+the response body should be extracted.
+
+The value to be extracted can be further defined using a regular expression
+with a capture block. The regular expression is applied to the field matching
+the XPATH associated with the extractor.
+
+<b>Note</b>: Because XPATH is used to define fields in extractors and
+validators, only requests that return XML can be followed by filters.
+
+  name: Create Mephisto Server
+  steps:
+    - request:
+        operation:      create
+        resource:       servers
+        valid_codes:
+          - 201
+        params:
+          - name:       server[nickname]
+            value:      'resat created server'
+          - name:       server[server_template_href]
+            value:      $server_template_href
+          - name:       server[deployment_href]
+            value:      $deployment_href
+      filters:
+        - name:         validate server response
+          target:       body
+          is_empty:     true
+        - name:         extract server id
+          target:       header
+          extractors:
+            - field:    location
+              pattern:  '.*\/(\d+)$'
+              variable: server_id
+
+A scenario request can also use <i>guards</i>. A guard identifies a response
+element similarly to an extractor (response header or body field identified by
+an XPATH and optionally a regular expression). A guard specifies a value that
+the element must match together with a period and a timeout that should be used
+to retry the request until the value matches the guard or the timeout is
+reached.
+
+  name: Wait until server 42 is operational
+  steps:
+    - request:
+        resource:  servers
+        id:        42
+        operation: show
+      guards:
+        - target:  body
+          field:   server/state
+          pattern: 'operational'
+          period:  10
+          timeout: 300
+          name:    server operational
