@@ -20,15 +20,15 @@ running the examples.
 
 * Run:
 
-  resat scenarios -d user:<your twitter username> -d pass:<your twitter password>
+    resat scenarios -d user:<your twitter username> -d pass:<your twitter password>
 
 * See:
 
-  $ cat output.yml
+    $ cat output.yml
 
 * See more:
 
-  $ vi /tmp/resat.log
+    $ vi /tmp/resat.log
 
 or
 
