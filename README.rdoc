@@ -28,11 +28,11 @@ This configuration file is located in <tt>config/resat.yaml</tt> by default.
 
 There are two main use cases for resat:
 
- 1. Scripting: Resat can be used to chaing together a serie of REST API calls
-    that can be used to perform repetitive tasks.
+1. Scripting: Resat can be used to chaing together a serie of REST API calls
+   that can be used to perform repetitive tasks.
 
- 2. API testing: For REST API implementors, resat is the ideal automated
-    regression tool. This is the tool we use at RightScale to test our APIs.
+2. API testing: For REST API implementors, resat is the ideal automated
+   regression tool. This is the tool we use at RightScale to test our APIs.
 
 == How to use
 
@@ -124,3 +124,5 @@ The source code of Resat is available via Git:
 resat relies on Kwalify for validating YAML files:
 
   $ sudo gem install kwalify
+
+* http://www.kuwata-lab.com/kwalify/
