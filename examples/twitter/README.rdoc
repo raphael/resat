@@ -18,15 +18,15 @@ running the examples.
 
 = How to
 
-1. Run:
+* Run:
 
   resat scenarios -d user:<your twitter username> -d pass:<your twitter password>
 
-2. See:
+* See:
 
   $ cat output.yml
 
-3. See more:
+* See more:
 
   $ vi /tmp/resat.log
 
