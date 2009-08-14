@@ -1,83 +1,72 @@
-== Where to get resat
+= Resat
 
-  The source code is available via Git:
+= DESCRIPTION
 
-    $ git clone git://github.com/raphael/resat.git
+== Synopsis
 
-== Dependencies
+Resat is a script engine which allows grouping web requests into <b>scenarios</b>.
 
-resat relies on Kwalify for validating YAML files:
+A scenario consists of serie of HTTP requests called <b>steps</b>.
 
-  $ sudo gem install kwalify 
+Each step may be associated with <b>guards</b> and/or <b>filters</b>.
 
-== Synopsis 
+The syntax used to defined scenarios is simple and can be used by programmers and
+non-programmers alike. See the WRITING SCENARIOS section below for examples.
 
-resat - Web scripting for the masses
+* Guards keep making the same request until the response header and/or body
+  satisfy(ies) certain conditions.
 
-resat allows running predefined +scenarios+.
-A scenario consists of HTTP requests optionally followed by guards and
-filters.
-
-Guards will keep re-sending the same request until the response header and/or
-body satisfy(ies) certain conditions.
-
-Filters will validate the response and/or save some of its elements in
-variables. Variables can be used to define requests, guards and filters.
+* Filters validate the response and may save some of its elements in variables.
+  Variables can be used to define requests, guards and filters.
 
 Scenarios are defined as YAML documents that must adhere to the Kwalify
-schemas defined in schemas/scenarios.yaml. See the comments in this
+schemas defined in <tt>schemas/scenarios.yaml</tt>. See the comments in this
 file for additional information.
 
-resat is configured through a YAML configuration file which defines
+Resat is configured through a YAML configuration file which defines
 default values that applies to all requests including the host name,
 base url, whether to use SSL, common headers and body parameters and
 optionally a username and password to be used with basic authentication.
-This configuration file is located in config/resat.yaml by default.
-
-== Installation
-  
-Run the following from this folder to be able to run resat from anywhere:
-
-  sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+This configuration file is located in <tt>config/resat.yaml</tt> by default.
 
 == Why resat?
-  
+
 There are two main use cases for resat:
-  1. Scripting a set of REST API calls that can be used to perform common
-     tasks. For example creating a preset deployment or running a set of
-     operational scripts on instances in RightScale.
-  2. API testing: For REST API implementors, resat is the ideal automated
-     regression tool. This is the tool we use at RightScale to test our
-     APIs.
+
+1. Scripting: Resat can be used to chaing together a serie of REST API calls
+   that can be used to perform repetitive tasks.
+
+2. API testing: For REST API implementors, resat is the ideal automated
+   regression tool. This is the tool we use at RightScale to test our APIs.
 
 == How to use
 
 resat can be used as a ruby library or as an application. Using it as library
 involves instantiating the engine and calling the 'run' method:
 
-  require 'resat'
-  
-  options = OpenStruct.new
-  options.verbose = false
-  options.quiet = false
-  options.norecursion = false
-  options.loglevel = "info"
-  options.logfile = "resat.log"
-  options.configfile = "config/resat.yaml"
-  options.schemasdir = 'schemas'
+ require 'resat'
 
-  Resat::Log.init(options)
-  engine = Resat::Engine.new(options)
-  engine.run
+ options             = OpenStruct.new
+ options.verbose     = false
+ options.quiet       = false
+ options.norecursion = false
+ options.loglevel    = 'info'
+ options.logfile     = 'resat.log'
+ options.configfile  = 'config/resat.yaml'
+ options.schemasdir  = 'schemas'
 
-  if engine.succeeded?
-    puts engine.summary.dark_blue
-  else
-    puts engine.summary.dark_red
-  end
-  puts "#{engine.requests_count} request(s)."
-  puts "#{engine.ignored_count} scenario(s) ignored."
-  puts "#{engine.skipped_count} YAML file(s) skipped."
+ Resat::Log.init(options)
+ engine = Resat::Engine.new(options)
+ engine.run
+
+ if engine.succeeded?
+   puts engine.summary.dark_blue
+ else
+   puts engine.summary.dark_red
+ end
+ puts "#{engine.requests_count} request(s)."
+ puts "#{engine.ignored_count} scenario(s) ignored."
+ puts "#{engine.skipped_count} YAML file(s) skipped."
 
 See the examples and usage sections below for using resat as an application.
 
@@ -85,23 +74,23 @@ See the examples and usage sections below for using resat as an application.
 
 Run the scenario defined in scenario.yaml:
 
-  resat scenario.yaml
+ $ resat scenario.yaml
 
 Execute scenarios defined in the 'scenarios' directory and its
 sub-directories:
 
-  resat scenarios
+ $ resat scenarios
 
 Only execute the scenarios defined in the current directory, do not execute
 scenarios found in sub-directories:
 
-  resat -n .
+ $ resat -n .
 
-== Usage 
+== Usage
 
-  resat [options] target
+ resat [options] target
 
-  For help use: resat -h
+ For help use: resat -h
 
 == Options
 
@@ -116,4 +105,191 @@ scenarios found in sub-directories:
  -c, --config PATH Config file path (config/resat.yaml by default)
  -s, --schemasdir DIR Path to schemas directory (schemas/ by default)
  -l, --loglevel LVL Log level: debug, info, warn, error (info by default)
- -F, --logfile PATH Log file path (resat.log by default)  
+ -F, --logfile PATH Log file path (resat.log by default)
+
+= INSTALLATION
+
+Run the following command from the current folder to be able to run resat from
+anywhere:
+
+ $ sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+
+= DEVELOPMENT
+
+== Source
+
+The source code of Resat is available via Git:
+
+ $ git clone git://github.com/raphael/resat.git
+
+* http://github.com/raphael/resat.git
+
+== Dependencies
+
+resat relies on Kwalify for validating YAML files:
+
+ $ sudo gem install kwalify
+
+* http://www.kuwata-lab.com/kwalify/
+
+= WRITING SCENARIOS
+
+At the heart of your resat scripts are the scenarios. A scenario consists of
+one or more steps. A scenario may include other scenarios. A single execution
+of Resat can apply to multiple scenarios (all scenarios in a given folder).
+
+A simple scenario containing a single step is defined below:
+
+ name: List all servers
+ steps:
+   - request:
+       operation: index
+       resource:  servers
+
+The first element of the scenario is its name. The name is used by the command
+line tool for update and error outputs.
+
+The second element is the list of steps. A step must contain a request. A
+request corresponds to one of the REST CRUD operations and applies to a
+resource. CRUD operations are <i>create</i>, <i>show</i>, <i>index</i>, <i>update</i>,
+and <i>destroy</i>.
+
+Operations that apply to a single resource rather than to all resources require
+the <i>id</i> element:
+
+ name: Show server 42
+ steps:
+   - request:
+       operation: show
+       resource:  servers
+       id:        42
+
+Resat also allows defining <i>custom</i> requests for making web requests that
+don't map to a CRUD operation. A custom request is defined by a <i>type</i>
+corresponding to the HTTP verb that the request should use (i.e. <tt>get</tt>, <tt>post</tt>,
+<tt>put</tt> or <tt>delete</tt>) and its name.
+
+ name: Twitter Timelines
+ steps:
+   - request:
+       resource:  statuses
+       custom:                         # Use a custom operation
+         name:    public_timeline.xml  # Operation name
+         type:    get                  # GET request
+
+Requests can then be followed by filters which can validate the response and/or
+extract elements from it.
+
+ name: Get Mephisto ServerTemplate
+ steps:
+   - request:
+       operation:      index
+       resource:       server_templates
+     filters:
+       - name:         get server template href
+         target:       body
+         validators:
+           - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
+             is_empty: false
+         extractors:
+           - field:    server-templates/ec2-server-template[nickname='Mephisto all-in-one v8']/href
+             variable: server_template_href
+
+Variables that are extracted from a request response can then be used for
+other requests, filters or guards. A variable is used using the <tt>$</tt> sign
+followed by the variable name. A variable may be written to an output file if
+it has the <i>save</i> element and the configuration file defines an output
+file. A variable can also be exported to other scenarios that will get run in
+the same Resat execution (so a scenario can create resources and save their ids
+and a following scenario can reuse the ids to delete or update the resources).
+
+The element to extract can be a response header or a response body field. If it
+is a response body field then an XPATH query is used to identity which part of
+the response body should be extracted.
+
+The value to be extracted can be further defined using a regular expression
+with a capture block. The regular expression is applied to the field matching
+the XPATH associated with the extractor.
+
+<b>Note</b>: Because XPATH is used to define fields in extractors and
+validators, only requests that return XML can be followed by filters.
+
+ name: Create Mephisto Server
+ steps:
+   - request:
+       operation:      create
+       resource:       servers
+       valid_codes:
+         - 201
+       params:
+         - name:       server[nickname]
+           value:      'resat created server'
+         - name:       server[server_template_href]
+           value:      $server_template_href
+         - name:       server[deployment_href]
+           value:      $deployment_href
+     filters:
+       - name:         validate server response
+         target:       body
+         is_empty:     true
+       - name:         extract server id
+         target:       header
+         extractors:
+           - field:    location
+             pattern:  '.*\/(\d+)$'
+             variable: server_id
+
+A scenario request can also use <i>guards</i>. A guard identifies a response
+element similarly to an extractor (response header or body field identified by
+an XPATH and optionally a regular expression). A guard specifies a value that
+the element must match together with a period and a timeout that should be used
+to retry the request until the value matches the guard or the timeout is
+reached.
+
+ name: Wait until server 42 is operational
+ steps:
+   - request:
+       resource:  servers
+       id:        42
+       operation: show
+     guards:
+       - target:  body
+         field:   server/state
+         pattern: 'operational'
+         period:  10
+         timeout: 300
+         name:    server operational
+
+= ADDITIONAL RESOURCES
+
+* Refer to the examples (http://github.com/raphael/resat/tree/master/examples)
+  for fully functional and documented scenarios.
+* See the file <tt>schemas/scenarios.yaml</tt>
+  (http://github.com/raphael/resat/blob/master/schemas/scenarios.yaml) for
+  the complete reference on scenarios syntax.
+
+= LICENSE
+
+Resat - Web scripting for the masses
+
+Author:: Raphael Simon (<raphael@rightscale.com>)
+Copyright:: Copyright (c) 2009 RightScale, Inc. 
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
