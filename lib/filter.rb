@@ -69,6 +69,7 @@ module Resat
     # Extract elements from response
     def extract
       @extractors.each do |ex|
+        Variables.substitute!(ex.field)
         if @request.has_response_field?(ex.field, @target)
           field = @request.get_response_field(ex.field, @target)
           if ex.pattern

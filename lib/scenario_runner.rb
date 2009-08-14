@@ -71,8 +71,9 @@ module Resat
           step.run(@request) 
         end
         step.failures.each { |f| add_failure(f) }
-         if @failonerror
-          return unless succeeded? # Abort on failure
+        if @failonerror && !succeeded?
+          Variables.save(Config.output) if Config.output
+          return # Abort on failure
         end
       end
 
