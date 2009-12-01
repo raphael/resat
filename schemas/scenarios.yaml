@@ -50,6 +50,11 @@
 #   resource:  server
 #   id:        $server_id
 #
+#   Finally, API responses can also be run through handlers. Handlers have
+#   access to the raw request and response for processing. The scenario
+#   specifies the name of the module that implements the handler. The module
+#   should expose a 'process' method taking two arguments: the underlying
+#   HTTP request and corresponding response.
 
 # Schema for scenarios definitions
 type:  map
@@ -68,7 +73,8 @@ mapping:
       - type: map
         class: Resat::Step
         mapping:
-          "request":                                                             # API Request definition
+#------------------------------------------------------------------------------------------------------------------------          
+          "request":                                                             # API REQUEST DEFINITION
             type:  map
             class: Resat::ApiRequest
             mapping:
@@ -89,6 +95,7 @@ mapping:
               "resource":  { type: str, required: yes }                          # Request resource
               "id":        { type: str }                                         # Request resource id
               "format":    { enum: [js, xml, html], default: xml }               # Request format (only applies to GET requests)
+              "delay":     { type: str}                                          # Delay before request is made (integer or range)
               "params":                                                          # Request body parameters
                 &name_value_pairs
                 type: seq
@@ -102,7 +109,8 @@ mapping:
                 type: seq
                 sequence:
                   - type: int
-          "guards":
+#------------------------------------------------------------------------------------------------------------------------          
+          "guards":                                                              # GUARDS DEFINITION
             type: seq
             sequence:
               - type:  map
@@ -115,7 +123,8 @@ mapping:
                   "pattern": { type: str }                                       # Pattern field should match if any
                   "period":  { type: int, default: 5 }                           # Period between API requests
                   "timeout": { type: int, default: 120 }                         # Guard timeout 
-          "filters":                                                             # Filters definition
+#------------------------------------------------------------------------------------------------------------------------          
+          "filters":                                                             # FILTERS DEFINITION
             type: seq
             sequence:
               - type:  map
@@ -149,3 +158,12 @@ mapping:
                           "save":     { type: bool, default: no }                # Whether variable should be saved in output file
                           "export":   { type: bool, default: no }                # Whether variable should be exported so that other
                                                                                  # scenarios in same execution can use it
+#------------------------------------------------------------------------------------------------------------------------          
+          "handlers":                                                            # HANDLERS DEFINITION
+            type: seq
+            sequence:
+              - type:  map
+                class: Resat::Handler
+                mapping:
+                  "name":     { type: str, required: yes }                       # Handler name (used for logging)
+                  "module":   { type: str, required: yes }                       # Handler moduler name

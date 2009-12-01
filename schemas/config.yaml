@@ -41,6 +41,7 @@ mapping:
                   "name":  { type: str, required: yes, unique: yes }
                   "value": { type: str, required: yes }
     "headers":   *name_value_pairs           # Headers used for all requests
+    "delay":    { type: str }                # Delay in seconds before each request (integer or range)
     "variables": *name_value_pairs           # Global variables
     "output":   { type: str }                # Path to variables save file
     "input":    { type: str }                # Path to variables load file

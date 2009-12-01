@@ -48,6 +48,7 @@
 #   -s, --schemasdir DIR  Path to schemas directory (schemas/ by default)
 #   -l, --loglevel LVL    Log level: debug, info, warn, error (info by default)
 #   -F, --logfile PATH    Log file path (resat.log by default)
+#   -D, --dry-run         Print requests, don't actually make them
 #
 
 require 'rubygems'
@@ -77,6 +78,7 @@ module Resat
       @options.schemasdir =  File.join(File.dirname(THIS_FILE), 'schemas')
       @options.loglevel = "info"
       @options.logfile = "/tmp/resat.log"
+      @options.dry_run = false
     end
 
     # Parse options, check arguments, then run tests
@@ -110,6 +112,7 @@ module Resat
       opts.on('-s', '--schemasdir DIR') { |dir| @options.schemasdir = dir }
       opts.on('-l', '--loglevel LEVEL') { |level| @options.loglevel = level }
       opts.on('-F', '--logfile LOG')    { |log| @options.logfile = log }
+      opts.on('-D', '--dry-run')        { @options.dry_run = true }
 
       opts.parse!(@arguments) rescue return false
 

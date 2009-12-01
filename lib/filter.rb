@@ -10,12 +10,15 @@ module Resat
   class Filter
     include Kwalify::Util::HashLike
     attr_accessor :failures
+    
+    def prepare
+      @is_empty ||= false
+      @failures = []
+      Log.info("Running filter '#{@name}'")
+    end
 
     # Run filter on given response
     def run(request)
-      Log.info("Running filter #{@name}")
-      @is_empty ||= false
-      @failures = []
       @request = request
       @response = request.response
       validate

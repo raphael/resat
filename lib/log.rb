@@ -43,7 +43,11 @@ module Resat
     # Initialize singleton instance
     def Log.init(options)
       File.delete(options.logfile) rescue nil
-      options.logfile = 'resat.log' unless File.directory?(File.dirname(options.logfile))
+      if options.dry_run
+        options.logfile = STDOUT
+      else
+        options.logfile = 'resat.log' unless File.directory?(File.dirname(options.logfile))
+      end
       @logger = Logger.new(options.logfile)
       @logger.formatter = LogFormatter.new
       @level = LEVELS.index(options.loglevel.downcase) if options.loglevel

@@ -11,13 +11,15 @@ module Resat
     include Kwalify::Util::HashLike
     attr_accessor :failures
 
-    def wait(request)
-      Log.info("Waiting for guard #{@name}")
+    def prepare
       @timeout ||= 120
       @period ||= 5
       @failures = []
-
       Variables.substitute!(@pattern)
+      Log.info("Waiting for guard #{@name} with pattern /#{@pattern.to_s}/")
+    end
+    
+    def wait(request)
       r = Regexp.new(@pattern)
       r.match(request.get_response_field(@field, @target))
       expiration = DateTime.now + @timeout

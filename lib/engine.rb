@@ -33,15 +33,21 @@ module Resat
     end
 
     # Run all scenarios and set attributes accordingly
-    def run
+    def run(target=nil)
+      target ||= @options.target
       begin
-        if File.directory?(@options.target)
-          files = FileSet.new(@options.target, %w{.yml .yaml})
+        if File.directory?(target)
+          files = FileSet.new(target, %w{.yml .yaml})
+        elsif File.file?(target)
+          files = [target]
         else
-          files = [@options.target]
+          @failures[target] << "Invalid taget #{target}: Not a directory, nor a file"
+          return
         end
-          files.each do |file|
-          runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, @options.variables, @options.failonerror)
+        @failures[target] ||= []
+        files.each do |file|
+          runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, 
+                     @options.variables, @options.failonerror, @options.dry_run)
           @ignored_count += 1 if runner.ignored?
           @skipped_count += 1 unless runner.valid?
           if runner.valid? && !runner.ignored?

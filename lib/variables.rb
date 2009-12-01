@@ -3,6 +3,8 @@
 # See resat.rb for usage information.
 #
 
+require 'singleton'
+
 module Resat
 
   class Variables

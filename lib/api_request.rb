@@ -10,7 +10,7 @@ module Resat
   
   class ApiRequest
     include Kwalify::Util::HashLike
-    attr_accessor :response, :send_count, :failures
+    attr_reader :response, :send_count, :failures
 
     # Prepare request so 'send' can be called
     def prepare
@@ -82,8 +82,9 @@ module Resat
       @oks ||= %w{200 201 202 203 204 205 206}
      end
     
-    # Actually send the request, call 'prepare' first if it wasn't called yet.
+    # Actually send the request
     def send
+      sleep(delay_seconds) # Delay request if needed
       http = Net::HTTP.new(@uri.host, @uri.port)
       http.use_ssl = Config.use_ssl
       begin
@@ -117,6 +118,26 @@ module Resat
       doc = REXML::Document.new(@response.body)
       elem = doc.elements[field]
       return elem.get_text.to_s if elem
+    end
+
+    protected
+    
+    # Calculate number of seconds to wait before sending request
+    def delay_seconds
+      seconds = nil
+      if delay = @delay || Config.delay
+        min_delay = max_delay = nil
+        if delay =~ /([\d]+)\.\.([\d]+)/
+          min_delay = Regexp.last_match[1].to_i
+          max_delay = Regexp.last_match[2].to_i
+        elsif delay.to_i.to_s == delay
+          min_delay = max_delay = delay.to_i
+        end
+        if min_delay && max_delay
+          seconds = rand(max_delay - min_delay + 1) + min_delay
+        end
+      end
+      seconds || 0
     end
 
   end

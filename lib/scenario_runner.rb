@@ -19,14 +19,15 @@ module Resat
     # schemas directory.
     # If parsing the scenario YAML definition fails then 'valid?' returns false
     # and 'parser_errors' contains the error messages.
-    def initialize(doc, schemasdir, config, variables, failonerror)
+    def initialize(doc, schemasdir, config, variables, failonerror, dry_run)
       @schemasdir     = schemasdir
       @valid          = true
       @ignored        = false
       @name           = ''
       @failures       = Array.new
       @requests_count = 0
-      @failonerror = failonerror
+      @failonerror    = failonerror
+      @dry_run        = dry_run
       parse(doc)
       if @valid
         Config.init(config || @cfg_file, schemasdir)
@@ -60,21 +61,21 @@ module Resat
         @current_step = index
         @current_file = @steps[index][:origin]
         step = @steps[index][:step]
-        if step.kind_of?(ApiRequest)
+        case step
+        when ApiRequest
           @requests_count += @request.send_count if @request # Last request
           @request = step
           @request.prepare
-          @request.send
-        elsif step.kind_of?(Guard)
-          step.wait(@request)
-        elsif step.kind_of?(Filter)
-          step.run(@request) 
+          @request.send unless @dry_run
+        when Guard
+          step.prepare
+          step.wait(@request) unless @dry_run
+        when Filter, Handler
+          step.prepare
+          step.run(@request) unless @dry_run 
         end
         step.failures.each { |f| add_failure(f) }
-        if @failonerror && !succeeded?
-          Variables.save(Config.output) if Config.output
-          return # Abort on failure
-        end
+        break if @failonerror && !succeeded? # Abort on failure
       end
 
       @requests_count += @request.send_count
