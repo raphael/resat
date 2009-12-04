@@ -277,12 +277,10 @@ name followed the corresponding ruby module name.
 
 The ruby module must define a <tt>process</tt> method which accepts two arguments:
 
-  def process(request response)
+  def process(request, response)
 
-* <i>request</i>: an instance of Net::HTTPRequest corresponding to the request
-                   associated with this handler.
-* <i>response</i>: an instance of Net::HTTPResponse which contains the
-                    associated response.
+* <i>request</i>: an instance of Net::HTTPRequest corresponding to the request associated with this handler.
+* <i>response</i>: an instance of Net::HTTPResponse which contains the associated response.
 
 It should also define a <tt>failures</tt> method which can return a list of errors. 
 The errors will get logged and optionally stop the execution of resat if the 
