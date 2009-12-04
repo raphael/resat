@@ -10,7 +10,7 @@ module Resat
   
   class ApiRequest
     include Kwalify::Util::HashLike
-    attr_reader :response, :send_count, :failures
+    attr_reader :request, :response, :send_count, :failures
 
     # Prepare request so 'send' can be called
     def prepare

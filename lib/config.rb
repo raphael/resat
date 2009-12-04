@@ -35,7 +35,7 @@ module Resat
    
     DEFAULT_FILE = 'config/resat.yaml'
     
-    DEFAULT_SCHEMA_DIR = 'schemas'
+    DEFAULT_SCHEMA_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', 'schemas'))
 
     DEFAULTS = {
       'base_url' => '',
@@ -44,6 +44,7 @@ module Resat
     }
 
     def Config.init(filename, schemasdir)
+      (Config.methods - (Object.methods + [ 'init', 'valid?', 'method_missing' ])).each { |m| class << Config;self;end.send :remove_method, m.to_sym }
       schemafile = File.join(schemasdir || DEFAULT_SCHEMA_DIR, 'config.yaml')
       unless File.exists?(schemafile)
         Log.error("Missing configuration file schema '#{schemafile}'")

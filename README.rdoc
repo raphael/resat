@@ -8,7 +8,7 @@ Resat is a script engine which allows grouping web requests into <b>scenarios</b
 
 A scenario consists of serie of HTTP requests called <b>steps</b>.
 
-Each step may be associated with <b>guards</b> and/or <b>filters</b>.
+Each step may be associated with <b>guards</b> and/or <b>filters</b> and/or <b>handlers</b>.
 
 The syntax used to defined scenarios is simple and can be used by programmers and
 non-programmers alike. See the WRITING SCENARIOS section below for examples.
@@ -18,6 +18,8 @@ non-programmers alike. See the WRITING SCENARIOS section below for examples.
 
 * Filters validate the response and may save some of its elements in variables.
   Variables can be used to define requests, guards and filters.
+
+* Handlers allow writing custom code to handle a request and its response.
 
 Scenarios are defined as YAML documents that must adhere to the Kwalify
 schemas defined in <tt>schemas/scenarios.yaml</tt>. See the comments in this
@@ -57,7 +59,7 @@ involves instantiating the engine and calling the 'run' method:
 
  Resat::Log.init(options)
  engine = Resat::Engine.new(options)
- engine.run
+ engine.run('my_scenario.yaml')
 
  if engine.succeeded?
    puts engine.summary.dark_blue
@@ -109,20 +111,20 @@ scenarios found in sub-directories:
 
 = INSTALLATION
 
-Run the following command from the current folder to be able to run resat from
-anywhere:
+* <b>From source</b>: run the following command from the root folder to be able to run resat from anywhere:
 
- $ sudo ln -s `pwd`/resat.rb /usr/local/bin/resat
+ $ sudo ln -s `pwd`/bin/resat /usr/local/bin/resat
+
+* <b>Using the gem</b>: 
+
+ $ sudo gem install resat
 
 = DEVELOPMENT
 
 == Source
 
-The source code of Resat is available via Git:
-
- $ git clone git://github.com/raphael/resat.git
-
-* http://github.com/raphael/resat.git
+The source code of Resat is available via Git: http://github.com/raphael/resat.git
+Fork the project and send pull requests to contribute!
 
 == Dependencies
 
@@ -259,6 +261,25 @@ reached.
          period:  10
          timeout: 300
          name:    server operational
+
+Finally a scenario request can include <i>handlers</i>. Handlers can only be
+included when resat is used as a library. The handler definition lists a unique
+name followed the corresponding ruby module name.
+
+ name: Store servers definitions
+ steps:
+   - request:
+       resource:  servers
+       operation: index
+     handlers:
+       - name:    save results
+         module:  ServersPersister
+
+The ruby module must define a <tt>process</tt> method which accepts two arguments:
+ * <i>request</i>: an instance of Net::HTTPRequest corresponding to the request
+                   associated with this handler.
+ * <i>response</i>: an instance of Net::HTTPResponse which contains the
+                    associated response.
 
 = ADDITIONAL RESOURCES
 

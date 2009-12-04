@@ -15,6 +15,7 @@ module Resat
     attr_accessor :failures
 
     def prepare
+      @failures = []
       Log.info("Running handler '#{@name}'")      
     end
     
@@ -22,21 +23,28 @@ module Resat
       klass = module_class(@module)
       h = klass.new
       h.process(request.request, request.response)
-      @failures = h.failures
+      @failures += h.failures.values.to_a if h.failures
     end
     
     protected
     
     # Create and cache instance of Class which includes
     # given module.
-    def module_class(module)
-      @@modules = {} unless defined?(:@@modules)
-      unless klass = @@modules[module]
-        klass = Class.new(Object) { include @module }
-        @@modules[module] = klass
+    def module_class(mod)
+      @@modules ||= {}
+      unless klass = @@modules[mod]
+        klass = Class.new(Object) { include Handler.get_module(mod) }
+        @@modules[mod] = klass
       end
       klass
     end
-    
+
+    def self.get_module(name)
+      parts = name.split('::')
+      index = 0
+      res   = Kernel
+      index += 1 while (index < parts.size) && (res = res.const_get(parts[index]))
+      res
+    end
   end
 end

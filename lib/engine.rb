@@ -45,8 +45,9 @@ module Resat
           return
         end
         @failures[target] ||= []
+        schemasdir = @options.schemasdir || Config::DEFAULT_SCHEMA_DIR
         files.each do |file|
-          runner = ScenarioRunner.new(file, @options.schemasdir, @options.config, 
+          runner = ScenarioRunner.new(file, schemasdir, @options.config, 
                      @options.variables, @options.failonerror, @options.dry_run)
           @ignored_count += 1 if runner.ignored?
           @skipped_count += 1 unless runner.valid?

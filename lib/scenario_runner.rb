@@ -9,10 +9,12 @@ require File.join(File.dirname(__FILE__), 'variables')
 require File.join(File.dirname(__FILE__), 'api_request')
 require File.join(File.dirname(__FILE__), 'guard')
 require File.join(File.dirname(__FILE__), 'filter')
+require File.join(File.dirname(__FILE__), 'handler')
 
 module Resat
 
   class ScenarioRunner
+
     attr_accessor :requests_count, :parser_errors, :failures
 
     # Instantiate new scenario runner with given YAML definition document and
@@ -34,7 +36,7 @@ module Resat
         @valid = Config.valid?
         if @valid
           Variables.reset
-          Variables.load(Config.input, schemasdir) if Config.input
+          Variables.load(Config.input, schemasdir) if Config.input && File.readable?(Config.input)
           Config.variables.each { |v| Variables[v['name']] = v['value'] } if Config.variables
           variables.each { |k, v| Variables[k] = v } if variables
         end
@@ -74,6 +76,7 @@ module Resat
           step.prepare
           step.run(@request) unless @dry_run 
         end
+        puts step.inspect if step.failures.nil?
         step.failures.each { |f| add_failure(f) }
         break if @failonerror && !succeeded? # Abort on failure
       end
@@ -102,6 +105,9 @@ module Resat
             @steps << { :step => step.request, :origin => doc }
             if step.filters
               @steps.concat(step.filters.map { |f| { :step => f, :origin => doc } })
+            end
+            if step.handlers
+              @steps.concat(step.handlers.map { |h| { :step => h, :origin => doc } })
             end
             if step.guards
               @steps.concat(step.guards.map { |g| { :step => g, :origin => doc } })
@@ -141,12 +147,15 @@ module Resat
           if step.filters
             @steps.concat(step.filters.map { |f| { :step => f, :origin => path } })
           end
+          if step.handlers
+            @steps.concat(step.handlers.map { |h| { :step => h, :origin => path } })
+          end
           if step.guards
             @steps.concat(step.guards.map { |g| { :step => g, :origin => path } })
           end
         end
       else
-        Log.error("Cannot include file '#{path}': #{parser_error(parser.errors)}")
+        Log.error("Cannot include file '#{path}': #{parser.errors.join(", ")}")
       end
     end
     
@@ -182,7 +191,7 @@ module Resat
   
   class Step
     include Kwalify::Util::HashLike
-    attr_accessor :request, :filters, :guards
+    attr_accessor :request, :filters, :handlers, :guards
   end
   
   class CustomOperation
