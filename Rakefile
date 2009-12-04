@@ -1,8 +1,9 @@
 require 'rubygems'
 require 'rake/gempackagetask'
+require 'lib/resat'
 
 GEM      = 'resat'
-GEM_VER  = '0.7.0'
+GEM_VER  = Resat::VERSION
 AUTHOR   = 'Raphael Simon'
 EMAIL    = 'raphael@rightscale.com'
 HOMEPAGE = 'http://github.com/raphael/resat'

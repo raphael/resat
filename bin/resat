@@ -58,11 +58,10 @@ require 'date'
 require 'benchmark'
 THIS_FILE = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
 require File.expand_path(File.join(File.dirname(THIS_FILE), '..', 'lib', 'rdoc_patch'))
-require File.expand_path(File.join(File.dirname(THIS_FILE), '..', 'lib', 'engine'))
+require File.expand_path(File.join(File.dirname(THIS_FILE), '..', 'lib', 'resat'))
 
 module Resat
   class App
-    VERSION = '0.7.0'
 
     def initialize(arguments)
       @arguments = arguments
