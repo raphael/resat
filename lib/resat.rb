@@ -3,7 +3,7 @@
 #
 
 module Resat
-  VERSION = '0.7.2'
+  VERSION = '0.7.3'
 end
 
 require File.join(File.dirname(__FILE__), 'engine')
