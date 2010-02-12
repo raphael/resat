@@ -41,10 +41,10 @@ module Resat
         elsif File.file?(target)
           files = [target]
         else
+          @failures[target] ||= []
           @failures[target] << "Invalid taget #{target}: Not a directory, nor a file"
           return
         end
-        @failures[target] ||= []
         schemasdir = @options.schemasdir || Config::DEFAULT_SCHEMA_DIR
         files.each do |file|
           runner = ScenarioRunner.new(file, schemasdir, @options.config, 

@@ -74,7 +74,7 @@ module Resat
       @options.failonerror = false
       @options.variables = {}
       @options.config = nil
-      @options.schemasdir =  File.join(File.dirname(THIS_FILE), 'schemas')
+      @options.schemasdir = File.expand_path(File.join(File.dirname(THIS_FILE), '..', 'schemas'))
       @options.loglevel = "info"
       @options.logfile = "/tmp/resat.log"
       @options.dry_run = false
