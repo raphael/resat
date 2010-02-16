@@ -41,7 +41,7 @@ module Resat
       path = "#{base_url}#{@resource}"
       path = "#{path}/#{@id}" if @id
       path = "#{path}.#{@format}" if @format && !@custom
-      Variables.substitute!(@custom.name)
+      Variables.substitute!(@custom.name) if @custom
       path = "#{path}#{@custom.separator}#{@custom.name}" if @custom
       @uri.merge!(path)
 
