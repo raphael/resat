@@ -7,6 +7,9 @@
 #   is marked as 'ignore' (that way it becomes possible to define
 #   include-only scenarios).
 #
+#   A request can be defined either as a REST request by listing the REST
+#   resource and operation or by specifying the path manually.
+#
 #   Each step may define guards, that is conditions that must be validated
 #   before the flow can proceed. These conditions may apply to the response
 #   header or body and may define a pattern that a given field must validate
@@ -84,17 +87,20 @@ mapping:
               "use_ssl":   { type: bool }                                        # http or https (config override)
               "username":  { type: str }                                         # Basic auth username (config override)
               "password":  { type: str }                                         # Basic auth password (config override)
-              "operation": { enum: [create, index, show, update, destroy] }      # Request operation
-              "custom":                                                          # Custom operation
+              "resource":  { type: str }                                         # REST request resource
+              "operation": { enum: [create, index, show, update, destroy] }      # REST request operation
+              "custom":                                                          # REST custom operation
                 type:  map
                 class: Resat::CustomOperation
                 mapping:
-                  "name":      { type: str, required: yes }                      # Custom operation name
-                  "type":      { enum: [get, post, put, delete], required: yes } # Custom operation request type
-                  "separator": { type: str, default: / }                         # Separator between base URI and operation name
-              "resource":  { type: str, required: yes }                          # Request resource
+                  "name":      { type: str, required: yes }                      # REST custom operation name
+                  "separator": { type: str, default: / }                         # REST separator between base URI and operation name
+                  "type":      { enum: [get, post, put, delete], required: yes } # REST custom operation request type
+              "path":      { type: str }                                         # Request path (override REST settings)
+              "type":      { enum: [get, post, put, delete] }                    # Request type (override REST settings)
+              "absolute":  { type: str }                                         # Absolute
               "id":        { type: str }                                         # Request resource id
-              "format":    { enum: [js, xml, html], default: xml }               # Request format (only applies to GET requests)
+              "format":    { enum: [js, xml, html, ''], default: xml }           # Request format (only applies to GET requests)
               "delay":     { type: str}                                          # Delay before request is made (integer or range)
               "params":                                                          # Request body parameters
                 &name_value_pairs
@@ -152,7 +158,7 @@ mapping:
                       - type:  map
                         class: Resat::Extractor
                         mapping:
-                          "field":    { type: str, required: yes }               # Field extractor applies to
+                          "field":    { type: str }                              # Field extractor applies to, whole body if not specified
                           "pattern":  { type: str, pattern: /.*\(.*\).*/ }       # Pattern used to extract data (if any)
                           "variable": { type: str, required: yes, unique: yes }  # Variable extracted data should be stored in
                           "save":     { type: bool, default: no }                # Whether variable should be saved in output file

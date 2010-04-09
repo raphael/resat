@@ -152,7 +152,7 @@ The first element of the scenario is its name. The name is used by the command
 line tool for update and error outputs.
 
 The second element is the list of steps. A step must contain a request. A
-request corresponds to one of the REST CRUD operations and applies to a
+request can correspond to one of the REST CRUD operations and apply to a
 resource. CRUD operations are <i>create</i>, <i>show</i>, <i>index</i>, <i>update</i>,
 and <i>destroy</i>.
 
@@ -166,8 +166,8 @@ the <i>id</i> element:
        resource:  servers
        id:        42
 
-Resat also allows defining <i>custom</i> requests for making web requests that
-don't map to a CRUD operation. A custom request is defined by a <i>type</i>
+Resat also allows defining <i>custom</i> REST operations for making web requests that
+don't map to a standard CRUD operation. A custom operation is defined by a <i>type</i>
 corresponding to the HTTP verb that the request should use (i.e. <tt>get</tt>, <tt>post</tt>,
 <tt>put</tt> or <tt>delete</tt>) and its name.
 
@@ -178,6 +178,14 @@ corresponding to the HTTP verb that the request should use (i.e. <tt>get</tt>, <
        custom:                         # Use a custom operation
          name:    public_timeline.xml  # Operation name
          type:    get                  # GET request
+
+Alternatively, the path of a request can be defined manually:
+
+ name: Twitter Timeline
+ steps:
+   - request:
+       path: statuses/public_timeline.xml
+       type: get
 
 Requests can then be followed by filters which can validate the response and/or
 extract elements from it.

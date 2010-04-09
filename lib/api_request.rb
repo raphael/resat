@@ -35,14 +35,20 @@ module Resat
       Variables.substitute!(@id) if @id
       uri_class = (@use_ssl || @use_ssl.nil? && Config.use_ssl) ? URI::HTTPS : URI::HTTP
       port = @port || Config.port || uri_class::DEFAULT_PORT
-      @uri = uri_class.build( :host => @host || Config.host, :port => port )
+      Variables.substitute!(port)
+      host = @host || Config.host
+      Variables.substitute!(host)
+      @uri = uri_class.build( :host => host, :port => port )
       base_url = "/#{@base_url || Config.base_url}/".squeeze('/')
       Variables.substitute!(base_url)
-      path = "#{base_url}#{@resource}"
-      path = "#{path}/#{@id}" if @id
-      path = "#{path}.#{@format}" if @format && !@custom
-      Variables.substitute!(@custom.name) if @custom
-      path = "#{path}#{@custom.separator}#{@custom.name}" if @custom
+      path = @path
+      unless path
+        path = "#{base_url}#{@resource}"
+        path = "#{path}/#{@id}" if @id
+        path = "#{path}.#{@format}" if @format && !@format.empty? && !@custom
+        path = "#{path}#{@custom.separator}#{@custom.name}" if @custom
+      end
+      Variables.substitute!(path)
       @uri.merge!(path)
 
       # 3. Build request
@@ -52,15 +58,15 @@ module Resat
         when 'update'        then request_class = Net::HTTP::Put
         when 'destroy'       then request_class = Net::HTTP::Delete
       else
-        if @custom
-          case @custom.type
+        if type = (@type || @custom && @custom.type)
+          case type
             when 'get'    then request_class = Net::HTTP::Get
             when 'post'   then request_class = Net::HTTP::Post
             when 'put'    then request_class = Net::HTTP::Put
             when 'delete' then request_class = Net::HTTP::Delete
           end
         else
-          @failures << "Missing request operation for request on '#{@resource}'."
+          @failures << "Missing request type for request on '#{@resource}'."
           return
         end
       end
@@ -108,6 +114,7 @@ module Resat
     def has_response_field?(field, target)
       return unless @response
       return @response.key?(field) if target == 'header'
+      return true if field.nil? || field.empty?
       doc = REXML::Document.new(@response.body) rescue nil
       return doc && !doc.elements[field].nil?
     end
@@ -116,6 +123,7 @@ module Resat
     def get_response_field(field, target)
       return unless @response
       return @response[field] if target == 'header'
+      return @response.body if field.nil? || field.empty?
       doc = REXML::Document.new(@response.body)
       elem = doc.elements[field]
       return elem.get_text.to_s if elem

@@ -164,9 +164,12 @@ module Resat
       # File extension is optional in YAML definition
       # We'll use the one in the current folder if we can't find it in the same
       # folder as the including file
-      path = test if File.file?(test = File.join(dir, inc + '.yml'))
-      path = test if File.file?(test = File.join(dir, inc + '.yaml'))
-      path = test if File.file?(test = File.join(dir, inc))
+      val = File.join(dir, inc + '.yml')
+      path = val if File.file?(val)
+      val = File.join(dir, inc + '.yaml')
+      path = val if File.file?(val)
+      val = File.join(dir, inc)
+      path = val if File.file?(val)
       return path if path
       subs = Dir.entries(dir).select { |f| File.directory?(f) }
       subs = subs - FileSet::IGNORED_FOLDERS
