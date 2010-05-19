@@ -7,7 +7,7 @@ require 'rexml/document'
 require File.join(File.dirname(__FILE__), 'net_patch')
 
 module Resat
-  
+
   class ApiRequest
     include Kwalify::Util::HashLike
     attr_reader :request, :response, :send_count, :failures
@@ -24,11 +24,13 @@ module Resat
       @headers ||= []
       @params ||= []
       # Clone config values so we don't mess with them when expanding variables
-      config.headers.each do |h| 
-        @headers << { 'name' => h['name'].dup, 'value' => h['value'].dup }
+      config.headers.each do |h|
+        value = @headers.detect { |header| header['name'] == h['name'] }
+        @headers << { 'name' => h['name'].dup, 'value' => h['value'].dup } unless value
       end if config.headers
       config.params.each do |p|
-        @params << { 'name' => p['name'].dup, 'value' => p['value'].dup }
+        value = @params.detect { |header| header['name'] == h['name'] }
+        @params << { 'name' => h['name'].dup, 'value' => h['value'].dup } unless value
       end if config.params && request_class.REQUEST_HAS_BODY
       variables.substitute!(@params)
       variables.substitute!(@headers)
@@ -77,7 +79,7 @@ module Resat
       variables.substitute!(username) if username
       password = @password || config.password
       variables.substitute!(password) if password
-      if username && password 
+      if username && password
         @request.basic_auth(username, password)
       end
       form_data = Hash.new
@@ -90,7 +92,7 @@ module Resat
       @oks = @valid_codes.map { |r| r.to_s } if @valid_codes
       @oks ||= %w{200 201 202 203 204 205 206}
      end
-    
+
     # Actually send the request
     def send
       sleep(delay_seconds) # Delay request if needed
@@ -111,8 +113,8 @@ module Resat
         end
       end
     end
-    
-    # Does response include given header or body field? 
+
+    # Does response include given header or body field?
     def has_response_field?(field, target)
       return unless @response
       return @response.key?(field) if target == 'header'
@@ -120,7 +122,7 @@ module Resat
       doc = REXML::Document.new(@response.body) rescue nil
       return doc && !doc.elements[field].nil?
     end
-    
+
     # Get value of response header or body field
     def get_response_field(field, target)
       return unless @response
@@ -132,7 +134,7 @@ module Resat
     end
 
     protected
-    
+
     # Calculate number of seconds to wait before sending request
     def delay_seconds
       seconds = nil
