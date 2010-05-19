@@ -17,6 +17,8 @@ module Resat
     attr_accessor :skipped_count  # Total number of skipped YAML files
     attr_accessor :failures       # Hash of error messages (string arrays)
                                   # indexed by scenario filename
+    attr_accessor :variables      # Hash of variables hashes indexed by
+                                  # scenario filename
 
     def initialize(options)
       @options        = options
@@ -25,6 +27,7 @@ module Resat
       @ignored_count  = 0
       @requests_count = 0
       @skipped_count  = 0
+      @variables      = Hash.new
     end
     
     # Was test run successful?
@@ -55,7 +58,11 @@ module Resat
             runner.run
             @run_count += 1
             @requests_count += runner.requests_count
-            @failures[file] = runner.failures unless runner.failures.empty?
+            if runner.succeeded?
+              @variables[file] = runner.variables
+            else
+              @failures[file] = runner.failures
+            end
           else
             unless runner.valid?
               Log.info "Skipping '#{file}' (#{runner.parser_errors})"

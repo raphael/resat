@@ -15,7 +15,7 @@ module Resat
 
   class ScenarioRunner
 
-    attr_accessor :requests_count, :parser_errors, :failures
+    attr_accessor :requests_count, :parser_errors, :failures, :variables
 
     # Instantiate new scenario runner with given YAML definition document and
     # schemas directory.
@@ -32,13 +32,13 @@ module Resat
       @dry_run        = dry_run
       parse(doc)
       if @valid
-        Config.init(config || @cfg_file, schemasdir)
-        @valid = Config.valid?
+        @config = Config.new(config || @cfg_file, schemasdir)
+        @valid = @config.valid?
         if @valid
-          Variables.reset
-          Variables.load(Config.input, schemasdir) if Config.input && File.readable?(Config.input)
-          Config.variables.each { |v| Variables[v['name']] = v['value'] } if Config.variables
-          variables.each { |k, v| Variables[k] = v } if variables
+          @variables = Variables.new
+          @variables.load(@config.input, schemasdir) if @config.input && File.readable?(@config.input)
+          @config.variables.each { |v| @variables[v['name']] = v['value'] } if @config.variables
+          variables.each { |k, v| @variables[k] = v } if variables
         end
       end
     end
@@ -53,8 +53,8 @@ module Resat
     def run
       return if @ignored || !@valid
       Log.info("-" * 80 + "\nRunning scenario #{@name}")
-      unless Variables.empty?
-        info_msg = Variables.all.inject("Using variables:") do |msg, (k, v)|
+      unless @variables.empty?
+        info_msg = @variables.all.inject("Using variables:") do |msg, (k, v)|
           msg << "\n   - #{k}: #{v}"
         end
         Log.info(info_msg)
@@ -67,13 +67,13 @@ module Resat
         when ApiRequest
           @requests_count += @request.send_count if @request # Last request
           @request = step
-          @request.prepare
+          @request.prepare(@variables, @config)
           @request.send unless @dry_run
         when Guard
-          step.prepare
+          step.prepare(@variables)
           step.wait(@request) unless @dry_run
         when Filter, Handler
-          step.prepare
+          step.prepare(@variables)
           step.run(@request) unless @dry_run 
         end
         puts step.inspect if step.failures.nil?
@@ -82,7 +82,7 @@ module Resat
       end
 
       @requests_count += @request.send_count
-      Variables.save(Config.output) if Config.output
+      @variables.save(@config.output) if @config.output
     end
 
     protected

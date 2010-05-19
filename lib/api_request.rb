@@ -13,34 +13,36 @@ module Resat
     attr_reader :request, :response, :send_count, :failures
 
     # Prepare request so 'send' can be called
-    def prepare
+    def prepare(variables, config)
       @format ||= 'xml'
       @failures = []
       @send_count = 0
+      @config_delay = config.delay
+      @config_use_ssl = config.use_ssl
 
       # 1. Normalize call fields
       @headers ||= []
       @params ||= []
       # Clone config values so we don't mess with them when expanding variables
-      Config.headers.each do |h| 
+      config.headers.each do |h| 
         @headers << { 'name' => h['name'].dup, 'value' => h['value'].dup }
-      end if Config.headers
-      Config.params.each do |p|
+      end if config.headers
+      config.params.each do |p|
         @params << { 'name' => p['name'].dup, 'value' => p['value'].dup }
-      end if Config.params && request_class.REQUEST_HAS_BODY
-      Variables.substitute!(@params)
-      Variables.substitute!(@headers)
+      end if config.params && request_class.REQUEST_HAS_BODY
+      variables.substitute!(@params)
+      variables.substitute!(@headers)
 
       # 2. Build URI
-      Variables.substitute!(@id) if @id
-      uri_class = (@use_ssl || @use_ssl.nil? && Config.use_ssl) ? URI::HTTPS : URI::HTTP
-      port = @port || Config.port || uri_class::DEFAULT_PORT
-      Variables.substitute!(port)
-      host = @host || Config.host
-      Variables.substitute!(host)
+      variables.substitute!(@id) if @id
+      uri_class = (@use_ssl || @use_ssl.nil? && config.use_ssl) ? URI::HTTPS : URI::HTTP
+      port = @port || config.port || uri_class::DEFAULT_PORT
+      variables.substitute!(port)
+      host = @host || config.host
+      variables.substitute!(host)
       @uri = uri_class.build( :host => host, :port => port )
-      base_url = "/#{@base_url || Config.base_url}/".squeeze('/')
-      Variables.substitute!(base_url)
+      base_url = "/#{@base_url || config.base_url}/".squeeze('/')
+      variables.substitute!(base_url)
       path = @path
       unless path
         path = "#{base_url}#{@resource}"
@@ -48,7 +50,7 @@ module Resat
         path = "#{path}.#{@format}" if @format && !@format.empty? && !@custom
         path = "#{path}#{@custom.separator}#{@custom.name}" if @custom
       end
-      Variables.substitute!(path)
+      variables.substitute!(path)
       @uri.merge!(path)
 
       # 3. Build request
@@ -71,10 +73,10 @@ module Resat
         end
       end
       @request = request_class.new(@uri.to_s)
-      username = @username || Config.username
-      Variables.substitute!(username) if username
-      password = @password || Config.password
-      Variables.substitute!(password) if password
+      username = @username || config.username
+      variables.substitute!(username) if username
+      password = @password || config.password
+      variables.substitute!(password) if password
       if username && password 
         @request.basic_auth(username, password)
       end
@@ -93,7 +95,7 @@ module Resat
     def send
       sleep(delay_seconds) # Delay request if needed
       http = Net::HTTP.new(@uri.host, @uri.port)
-      http.use_ssl = Config.use_ssl
+      http.use_ssl = @config_use_ssl
       begin
         res = http.start { |http| @response = http.request(@request) }
       rescue Exception => e
@@ -134,7 +136,7 @@ module Resat
     # Calculate number of seconds to wait before sending request
     def delay_seconds
       seconds = nil
-      if delay = @delay || Config.delay
+      if delay = @delay || @config_delay
         min_delay = max_delay = nil
         if delay =~ /([\d]+)\.\.([\d]+)/
           min_delay = Regexp.last_match[1].to_i

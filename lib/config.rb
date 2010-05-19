@@ -43,8 +43,8 @@ module Resat
       'variables' => {}
     }
 
-    def Config.init(filename, schemasdir)
-      (Config.methods - (Object.methods + [ 'init', 'valid?', 'method_missing' ])).each { |m| class << Config;self;end.send :remove_method, m.to_sym }
+    def initialize(filename, schemasdir)
+      (self.methods - (Object.instance_methods + [ 'init', 'valid?', 'method_missing' ])).each { |m| self.class.send(:remove_method, m.to_sym) }
       schemafile = File.join(schemasdir || DEFAULT_SCHEMA_DIR, 'config.yaml')
       unless File.exists?(schemafile)
         Log.error("Missing configuration file schema '#{schemafile}'")
@@ -66,10 +66,8 @@ module Resat
           @config.merge!(config)
           # Dynamically define the methods to forward to the config hash
           @config.each_key do |meth|
-            (class << self; self; end).class_eval do
-              define_method meth do |*args|
-                @config[meth] || DEFAULTS[meth]
-              end
+            self.class.send(:define_method, meth) do |*args|
+              @config[meth] || DEFAULTS[meth]
             end
           end
         end
@@ -82,11 +80,11 @@ module Resat
       end
     end
 
-    def Config.valid?
+    def valid?
       @valid
     end
     
-    def self.method_missing(*args)
+    def method_missing(*args)
       nil
     end
 

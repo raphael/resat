@@ -11,11 +11,11 @@ module Resat
     include Kwalify::Util::HashLike
     attr_accessor :failures
 
-    def prepare
+    def prepare(variables)
       @timeout ||= 120
       @period ||= 5
       @failures = []
-      Variables.substitute!(@pattern)
+      variables.substitute!(@pattern)
       Log.info("Waiting for guard #{@name} with pattern /#{@pattern.to_s}/")
     end
     

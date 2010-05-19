@@ -11,9 +11,10 @@ module Resat
     include Kwalify::Util::HashLike
     attr_accessor :failures
     
-    def prepare
+    def prepare(variables)
       @is_empty ||= false
       @failures = []
+      @variables = variables
       Log.info("Running filter '#{@name}'")
     end
 
@@ -55,7 +56,7 @@ module Resat
         if @request.has_response_field?(v.field, @target)
           field = @request.get_response_field(v.field, @target)
           if v.pattern
-            Variables.substitute!(v.pattern)
+            @variables.substitute!(v.pattern)
             unless Regexp.new(v.pattern).match(field)
               @failures << "Validator /#{v.pattern} failed on '#{field}' from #{@target} field '#{v.field}'."
             end
@@ -72,22 +73,22 @@ module Resat
     # Extract elements from response
     def extract
       @extractors.each do |ex|
-        Variables.substitute!(ex.field)
+        @variables.substitute!(ex.field)
         if @request.has_response_field?(ex.field, @target)
           field = @request.get_response_field(ex.field, @target)
           if ex.pattern
-            Variables.substitute!(ex.pattern)
+            @variables.substitute!(ex.pattern)
             Regexp.new(ex.pattern).match(field)
             if Regexp.last_match
-              Variables[ex.variable] = Regexp.last_match(1)
+              @variables[ex.variable] = Regexp.last_match(1)
             else
               Log.warn("Extraction from response #{@target} field '#{ex.field}' ('#{field}') with pattern '#{ex.pattern}' failed.")
             end
           else
-            Variables[ex.variable] = field
+            @variables[ex.variable] = field
           end
-          Variables.mark_for_save(ex.variable) if ex.save
-          Variables.export(ex.variable) if ex.export
+          @variables.mark_for_save(ex.variable) if ex.save
+          @variables.export(ex.variable) if ex.export
         else
           Log.warn("Extraction from response #{@target} field '#{ex.field}' failed: field not found.")
         end
