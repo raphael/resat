@@ -116,11 +116,7 @@ module Resat
 
     # Does response include given header or body field?
     def has_response_field?(field, target)
-      return unless @response
-      return @response.key?(field) if target == 'header'
-      return true if field.nil? || field.empty?
-      doc = REXML::Document.new(@response.body) rescue nil
-      return doc && !doc.elements[field].nil?
+      !!get_response_field(field, target)
     end
 
     # Get value of response header or body field
@@ -128,12 +124,34 @@ module Resat
       return unless @response
       return @response[field] if target == 'header'
       return @response.body if field.nil? || field.empty?
-      doc = REXML::Document.new(@response.body)
-      elem = doc.elements[field]
-      return elem.get_text.to_s if elem
+      json = JSON.load(@response.body) rescue nil
+      field = nil
+      if json
+        field = json_field(json, field)
+      else
+        doc = REXML::Document.new(@response.body)
+        elem = doc.elements[field]
+        field = elem.get_text.to_s if elem
+      end
+      field
     end
 
     protected
+    
+    # Retrieve JSON body field
+    def json_field(json, field)
+      return nil unless json
+      fields = field.split('/')
+      fields.each do |field|
+        if json.is_a?(Array)
+          json = json[field.to_i]
+        else
+          json = json[field]
+        end
+        return nil unless json
+      end
+      json
+    end
 
     # Calculate number of seconds to wait before sending request
     def delay_seconds
