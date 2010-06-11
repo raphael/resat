@@ -15,6 +15,7 @@ module Resat
     def initialize
       @@exported = Hash.new unless defined? @@exported
       @vars = @@exported.dup
+      @marked_for_save = []
     end
 
     # Replace occurrences of environment variables in +raw+ with their value
