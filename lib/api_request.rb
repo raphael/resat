@@ -4,6 +4,7 @@
 
 require 'uri'
 require 'rexml/document'
+require 'json'
 require File.join(File.dirname(__FILE__), 'net_patch')
 
 module Resat
@@ -125,15 +126,15 @@ module Resat
       return @response[field] if target == 'header'
       return @response.body if field.nil? || field.empty?
       json = JSON.load(@response.body) rescue nil
-      field = nil
+      res = nil
       if json
-        field = json_field(json, field)
+        res = json_field(json, field)
       else
         doc = REXML::Document.new(@response.body)
         elem = doc.elements[field]
-        field = elem.get_text.to_s if elem
+        res = elem.get_text.to_s if elem
       end
-      field
+      res
     end
 
     protected
