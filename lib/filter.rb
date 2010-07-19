@@ -55,15 +55,13 @@ module Resat
       @validators.each do |v|
         if @request.has_response_field?(v.field, @target)
           field = @request.get_response_field(v.field, @target)
-          if v.pattern
+          is_ok = v.is_empty && field.empty?
+          is_ok ||= v.pattern && v.pattern.empty? && field.empty?
+          if v.pattern && !v.pattern.empty?
             @variables.substitute!(v.pattern)
-            unless Regexp.new(v.pattern).match(field)
-              @failures << "Validator /#{v.pattern} failed on '#{field}' from #{@target} field '#{v.field}'."
-            end
+            is_ok ||= Regexp.new(v.pattern).match(field)
           end
-          unless !!v.is_empty == field.empty?
-            @failures << "#{@target.capitalize} field '#{v.field}' #{'not ' if v.is_empty}empty."
-          end
+          @failures << "Validator /#{v.pattern} failed on '#{field}' from #{@target} field '#{v.field}'." unless is_ok
         else
           @failures << "Missing #{@target} field '#{v.field}'."
         end
